@@ -31,7 +31,7 @@ exports.getCategoryById = async (req, res) => {
     if (!category) {
       return res.status(404).json({
         success: false,
-        error: 'Category not found'
+        error: 'Không tìm thấy danh mục'
       });
     }
     
@@ -49,30 +49,24 @@ exports.getCategoryById = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
   try {
-    const { name, parent_id } = req.body;
-    
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        error: 'Category name is required'
-      });
+    const { category_id, name, parent_id } = req.body;
+
+    if (!name) return res.status(400).json({ success: false, error: 'Tên danh mục là bắt buộc' });
+
+    let finalCategoryId;
+    if (category_id !== undefined && category_id !== null && category_id !== '') {
+      const provided = parseInt(category_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'category_id phải là số' });
+      const exists = await Category.findOne({ category_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'category_id đã tồn tại' });
+      finalCategoryId = provided;
+    } else {
+      const lastCategory = await Category.findOne().sort({ category_id: -1 });
+      finalCategoryId = lastCategory ? lastCategory.category_id + 1 : 1;
     }
-    
-    // Get the next category_id
-    const lastCategory = await Category.findOne().sort({ category_id: -1 });
-    const nextCategoryId = lastCategory ? lastCategory.category_id + 1 : 1;
-    
-    const category = await Category.create({
-      category_id: nextCategoryId,
-      name,
-      parent_id: parent_id || null
-    });
-    
-    res.status(201).json({
-      success: true,
-      data: category,
-      message: 'Category created successfully'
-    });
+
+    const category = await Category.create({ category_id: finalCategoryId, name, parent_id: parent_id || null });
+    res.status(201).json({ success: true, data: category, message: 'Tạo danh mục thành công' });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -95,14 +89,14 @@ exports.updateCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({
         success: false,
-        error: 'Category not found'
+        error: 'Không tìm thấy danh mục'
       });
     }
     
     res.json({
       success: true,
       data: category,
-      message: 'Category updated successfully'
+      message: 'Cập nhật danh mục thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -120,13 +114,13 @@ exports.deleteCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({
         success: false,
-        error: 'Category not found'
+        error: 'Không tìm thấy danh mục'
       });
     }
     
     res.json({
       success: true,
-      message: 'Category deleted successfully'
+      message: 'Đã xóa danh mục thành công'
     });
   } catch (error) {
     res.status(500).json({

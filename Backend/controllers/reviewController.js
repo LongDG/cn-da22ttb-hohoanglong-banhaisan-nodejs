@@ -35,7 +35,7 @@ exports.getReviewById = async (req, res) => {
     if (!review) {
       return res.status(404).json({
         success: false,
-        error: 'Review not found'
+        error: 'Không tìm thấy đánh giá'
       });
     }
     
@@ -53,39 +53,25 @@ exports.getReviewById = async (req, res) => {
 
 exports.createReview = async (req, res) => {
   try {
-    const { product_id, user_id, rating, comment } = req.body;
-    
-    if (!product_id || !user_id || rating === undefined) {
-      return res.status(400).json({
-        success: false,
-        error: 'Product ID, user ID, and rating are required'
-      });
+    const { review_id, product_id, user_id, rating, comment } = req.body;
+
+    if (!product_id || !user_id || rating === undefined) return res.status(400).json({ success: false, error: 'Cần có product_id, user_id và rating' });
+    if (rating < 1 || rating > 5) return res.status(400).json({ success: false, error: 'Rating phải nằm trong khoảng từ 1 đến 5' });
+
+    let finalReviewId;
+    if (review_id !== undefined && review_id !== null && review_id !== '') {
+      const provided = parseInt(review_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'review_id phải là số' });
+      const exists = await Review.findOne({ review_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'review_id đã tồn tại' });
+      finalReviewId = provided;
+    } else {
+      const lastReview = await Review.findOne().sort({ review_id: -1 });
+      finalReviewId = lastReview ? lastReview.review_id + 1 : 1;
     }
-    
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({
-        success: false,
-        error: 'Rating must be between 1 and 5'
-      });
-    }
-    
-    // Get the next review_id
-    const lastReview = await Review.findOne().sort({ review_id: -1 });
-    const nextReviewId = lastReview ? lastReview.review_id + 1 : 1;
-    
-    const review = await Review.create({
-      review_id: nextReviewId,
-      product_id: parseInt(product_id),
-      user_id: parseInt(user_id),
-      rating: parseInt(rating),
-      comment: comment || null
-    });
-    
-    res.status(201).json({
-      success: true,
-      data: review,
-      message: 'Review created successfully'
-    });
+
+    const review = await Review.create({ review_id: finalReviewId, product_id: parseInt(product_id), user_id: parseInt(user_id), rating: parseInt(rating), comment: comment || null });
+    res.status(201).json({ success: true, data: review, message: 'Review created successfully' });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -102,7 +88,7 @@ exports.updateReview = async (req, res) => {
     if (rating !== undefined && (rating < 1 || rating > 5)) {
       return res.status(400).json({
         success: false,
-        error: 'Rating must be between 1 and 5'
+        error: 'Rating phải nằm trong khoảng từ 1 đến 5'
       });
     }
     
@@ -115,14 +101,14 @@ exports.updateReview = async (req, res) => {
     if (!review) {
       return res.status(404).json({
         success: false,
-        error: 'Review not found'
+        error: 'Không tìm thấy đánh giá'
       });
     }
     
     res.json({
       success: true,
       data: review,
-      message: 'Review updated successfully'
+      message: 'Đã cập nhật đánh giá thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -140,13 +126,13 @@ exports.deleteReview = async (req, res) => {
     if (!review) {
       return res.status(404).json({
         success: false,
-        error: 'Review not found'
+        error: 'Không tìm thấy đánh giá'
       });
     }
     
     res.json({
       success: true,
-      message: 'Review deleted successfully'
+      message: 'Đã xóa đánh giá thành công'
     });
   } catch (error) {
     res.status(500).json({

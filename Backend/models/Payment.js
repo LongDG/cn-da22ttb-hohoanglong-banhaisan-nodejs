@@ -37,10 +37,10 @@ const paymentSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'payments'
+  collection: 'Payments'
 });
 
-// Index (payment_id already has unique: true)
+// Chỉ mục (payment_id đã có unique: true)
 paymentSchema.index({ order_id: 1 });
 
 const Payment = mongoose.model('Payment', paymentSchema);

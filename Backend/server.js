@@ -28,6 +28,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const orderItemRoutes = require('./routes/orderItemRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const voucherRoutes = require('./routes/voucherRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/addresses', addressRoutes);
@@ -40,6 +41,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/order-items', orderItemRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/vouchers', voucherRoutes);
+app.use('/api/auth', authRoutes);
 
 // Root route
 app.get('/', (req, res) => {

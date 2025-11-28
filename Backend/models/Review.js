@@ -33,7 +33,7 @@ const reviewSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'reviews'
+  collection: 'Reviews'
 });
 
 // Index (review_id already has unique: true)

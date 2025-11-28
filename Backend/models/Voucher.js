@@ -39,7 +39,7 @@ const voucherSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'vouchers'
+  collection: 'Vouchers'
 });
 
 // Index (voucher_id and code already have unique: true which creates index automatically)

@@ -16,56 +16,82 @@ GET http://localhost:3000/api/users
 ### GET - Lấy user theo ID
 ```
 GET http://localhost:3000/api/users/1
+# Hướng dẫn Test API với Postman (cập nhật)
+
+**Base URL:** `http://localhost:3000/api`
+
+**Headers chung:**
+- `Content-Type: application/json`
+
+Lưu ý: hiện backend đang kết nối đến database `BIENTUOI_DB`. Dữ liệu mẫu có sẵn (số lượng hiện tại):
+- `Users`: 3
+- `Addresses`: 2
+- `Categories`: 5
+- `Products`: 3
+- `Product_Variants`: 6
+- `Suppliers`: 3
+- `Orders`: 2
+- `Order_Items`: 2
+- `Payments`: 2
+- `Vouchers`: 2
+
+----
+
+## 1. Users
+
+- GET tất cả users
+```
+GET /users
 ```
 
-### POST - Tạo user mới
+- GET user theo `user_id`
 ```
-POST http://localhost:3000/api/users
-Content-Type: application/json
+GET /users/:id          # ví dụ: /users/1
+```
 
+- POST tạo user
+```
+POST /users
+Body (JSON):
 {
   "full_name": "Nguyễn Văn C",
   "email": "nguyenvanc@example.com",
-  "password": "hashed_password_789",
+  "password": "your_password_here",
   "phone_number": "0923456789",
   "role": "customer"
 }
 ```
 
-### PUT - Cập nhật user
+- PUT cập nhật user
 ```
-PUT http://localhost:3000/api/users/1
-Content-Type: application/json
-
-{
-  "full_name": "Nguyễn Văn A Updated",
-  "email": "nguyenvana@example.com",
-  "phone_number": "0909123456"
-}
+PUT /users/:id
+Body (JSON): { ...fields cần cập nhật... }
 ```
 
-### DELETE - Xóa user
+- DELETE user
 ```
-DELETE http://localhost:3000/api/users/1
-```
-
-## 2. Addresses API
-
-### GET - Lấy tất cả addresses
-```
-GET http://localhost:3000/api/addresses
+DELETE /users/:id
 ```
 
-### GET - Lấy addresses theo userId
+----
+
+## 2. Addresses
+
+- GET tất cả addresses (hoặc lọc theo userId)
 ```
-GET http://localhost:3000/api/addresses?userId=1
+GET /addresses
+GET /addresses?userId=1
 ```
 
-### POST - Tạo address mới
+- GET address theo `address_id`
 ```
-POST http://localhost:3000/api/addresses
-Content-Type: application/json
+GET /addresses/:id
+```
 
+- POST tạo address
+```
+POST /addresses
+Body (JSON):
 {
   "user_id": 1,
   "recipient_name": "Nguyễn Văn A",
@@ -75,333 +101,193 @@ Content-Type: application/json
 }
 ```
 
-## 3. Categories API
-
-### GET - Lấy tất cả categories
+- PUT cập nhật address
 ```
-GET http://localhost:3000/api/categories
+PUT /addresses/:id
 ```
 
-### POST - Tạo category mới
+- DELETE address
 ```
-POST http://localhost:3000/api/categories
-Content-Type: application/json
+DELETE /addresses/:id
+```
 
-{
-  "name": "Cua",
-  "parent_id": null
+----
+
+## 3. Categories
+
+- GET tất cả categories
+```
+GET /categories
+```
+
+- POST tạo category (parent_id null nếu root)
+```
+POST /categories
+Body (JSON): { "name": "Cua", "parent_id": null }
+```
+
+----
+
+## 4. Suppliers
+
+- GET tất cả suppliers
+```
+GET /suppliers
+```
+
+- POST tạo supplier
+```
+POST /suppliers
+Body (JSON): { "name": "Nhà cung cấp X", "contact_info": "..." }
+```
+
+----
+
+## 5. Products
+
+- GET tất cả products (hỗ trợ query: `categoryId`, `status`)
+```
+GET /products
+GET /products?categoryId=10
+GET /products?status=active
+```
+
+- POST tạo product
+```
+POST /products
+Body (JSON): { "name":"Cá basa","description":"...","image_url":"/...","category_id":10,"supplier_id":501,"status":"active" }
+```
+
+----
+
+## 6. Product Variants
+
+- GET tất cả variants (hoặc lọc theo productId)
+```
+GET /product-variants
+GET /product-variants?productId=1001
+```
+
+- POST tạo variant
+```
+POST /product-variants
+Body (JSON): { "product_id": 1001, "name": "Size 1kg", "price": 450000, "sale_price": null, "stock_quantity": 50 }
+```
+
+----
+
+## 7. Reviews
+
+- GET tất cả reviews (hoặc lọc theo productId)
+```
+GET /reviews
+GET /reviews?productId=1001
+```
+
+- POST tạo review
+```
+POST /reviews
+Body (JSON): { "product_id":1001, "user_id":1, "rating":5, "comment":"Tốt" }
+```
+
+----
+
+## 8. Orders
+
+- GET tất cả orders
+```
+GET /orders
+```
+
+- GET order theo ID (bao gồm items)
+```
+GET /orders/:id
+```
+
+- POST tạo order (kèm `items`)
+```
+POST /orders
+Body (JSON): {
+  "user_id":1,
+  "shipping_address":"...",
+  "shipping_fee":30000,
+  "discount_amount":0,
+  "notes":"...",
+  "items":[ {"variant_id":2,"quantity":2} ]
 }
 ```
 
-### POST - Tạo sub-category
-```
-POST http://localhost:3000/api/categories
-Content-Type: application/json
+----
 
-{
-  "name": "Cá biển",
-  "parent_id": 1
-}
+## 9. Payments
+
+- GET tất cả payments
+```
+GET /payments
 ```
 
-## 4. Suppliers API
-
-### GET - Lấy tất cả suppliers
+- GET payments theo `orderId`
 ```
-GET http://localhost:3000/api/suppliers
+GET /payments?orderId=9001
 ```
 
-### POST - Tạo supplier mới
+- POST tạo payment
 ```
-POST http://localhost:3000/api/suppliers
-Content-Type: application/json
-
-{
-  "name": "Nhà cung cấp Hải sản Sài Gòn",
-  "contact_info": "ĐC: 456 Nguyễn Huệ, Q1, TP.HCM - ĐT: 028-9999999"
-}
+POST /payments
+Body (JSON): { "order_id":9001, "amount":1335000, "payment_method":"COD", "transaction_id":null }
 ```
 
-## 5. Products API
+----
 
-### GET - Lấy tất cả products
-```
-GET http://localhost:3000/api/products
-```
+## 10. Vouchers
 
-### GET - Lấy products theo category
+- GET tất cả vouchers
 ```
-GET http://localhost:3000/api/products?categoryId=2
+GET /vouchers
 ```
 
-### GET - Lấy products theo status
+- GET voucher theo code
 ```
-GET http://localhost:3000/api/products?status=active
-```
-
-### POST - Tạo product mới
-```
-POST http://localhost:3000/api/products
-Content-Type: application/json
-
-{
-  "name": "Cá basa",
-  "description": "Cá basa tươi sống, đóng gói sẵn",
-  "image_url": "/uploads/products/ca-basa.jpg",
-  "category_id": 1,
-  "supplier_id": 1,
-  "status": "active"
-}
+GET /vouchers/code/:code
 ```
 
-## 6. Product Variants API
-
-### GET - Lấy tất cả variants
+- POST tạo voucher
 ```
-GET http://localhost:3000/api/product-variants
-```
-
-### GET - Lấy variants theo productId
-```
-GET http://localhost:3000/api/product-variants?productId=1
+POST /vouchers
+Body (JSON): { "code":"SALE20K", "discount_type":"fixed_amount", "value":20000, "expiry_date":"2025-12-31T00:00:00Z" }
 ```
 
-### POST - Tạo variant mới
-```
-POST http://localhost:3000/api/product-variants
-Content-Type: application/json
+----
 
-{
-  "product_id": 1,
-  "name": "Khay 1kg",
-  "price": 240000,
-  "sale_price": 220000,
-  "stock_quantity": 15
-}
+## 11. Order Items
+
+- GET tất cả order-items
+```
+GET /order-items
 ```
 
-## 7. Reviews API
+----
 
-### GET - Lấy tất cả reviews
-```
-GET http://localhost:3000/api/reviews
-```
+## Ví dụ response thành công
 
-### GET - Lấy reviews theo productId
-```
-GET http://localhost:3000/api/reviews?productId=1
-```
-
-### POST - Tạo review mới
-```
-POST http://localhost:3000/api/reviews
-Content-Type: application/json
-
-{
-  "product_id": 1,
-  "user_id": 1,
-  "rating": 5,
-  "comment": "Sản phẩm rất tốt, sẽ mua lại!"
-}
-```
-
-## 8. Orders API
-
-### GET - Lấy tất cả orders
-```
-GET http://localhost:3000/api/orders
-```
-
-### GET - Lấy order theo ID (bao gồm items)
-```
-GET http://localhost:3000/api/orders/1001
-```
-
-### POST - Tạo order mới
-```
-POST http://localhost:3000/api/orders
-Content-Type: application/json
-
-{
-  "user_id": 1,
-  "shipping_address": "Số 456, Đường XYZ, Quận 1, TP.HCM",
-  "shipping_fee": 30000,
-  "discount_amount": 50000,
-  "notes": "Giao hàng buổi sáng",
-  "items": [
-    {
-      "variant_id": 1,
-      "quantity": 2
-    },
-    {
-      "variant_id": 2,
-      "quantity": 1
-    }
-  ]
-}
-```
-
-### PUT - Cập nhật order status
-```
-PUT http://localhost:3000/api/orders/1001
-Content-Type: application/json
-
-{
-  "status": "completed"
-}
-```
-
-## 9. Payments API
-
-### GET - Lấy tất cả payments
-```
-GET http://localhost:3000/api/payments
-```
-
-### GET - Lấy payments theo orderId
-```
-GET http://localhost:3000/api/payments?orderId=1001
-```
-
-### POST - Tạo payment mới
-```
-POST http://localhost:3000/api/payments
-Content-Type: application/json
-
-{
-  "order_id": 1001,
-  "amount": 170000,
-  "payment_method": "Momo",
-  "transaction_id": "MOMO123456"
-}
-```
-
-### PUT - Cập nhật payment status
-```
-PUT http://localhost:3000/api/payments/501
-Content-Type: application/json
-
-{
-  "status": "successful",
-  "transaction_id": "MOMO123456"
-}
-```
-
-## 10. Vouchers API
-
-### GET - Lấy tất cả vouchers
-```
-GET http://localhost:3000/api/vouchers
-`
-
-### GET - Lấy voucher theo code
-```
-GET http://localhost:3000/api/vouchers/code/SALE50K
-```
-
-### POST - Tạo voucher mới
-```
-POST http://localhost:3000/api/vouchers
-Content-Type: application/json
-
-{
-  "code": "SALE20K",
-  "discount_type": "fixed_amount",
-  "value": 20000,
-  "expiry_date": "2025-12-31T00:00:00Z",
-  "usage_limit": 100
-}
-```
-
-### POST - Tạo voucher phần trăm
-```
-POST http://localhost:3000/api/vouchers
-Content-Type: application/json
-
-{
-  "code": "SALE15P",
-  "discount_type": "percentage",
-  "value": 15,
-  "expiry_date": "2025-12-25T00:00:00Z",
-  "usage_limit": 50
-}
-```
-
-## Response Examples
-
-### Success Response
 ```json
 {
   "success": true,
-  "data": {
-    "user_id": 1,
-    "full_name": "Nguyễn Văn A",
-    "email": "nguyenvana@example.com",
-    "role": "customer"
-  },
-  "message": "User created successfully"
+  "data": [ ... ],
+  "count": 3
 }
 ```
 
-### Error Response
-```json
-{
-  "success": false,
-  "error": "User not found"
-}
+## Ghi chú khi test
+
+- Đảm bảo server đang chạy: `node server.js` trong `Backend` và `Base URL` đúng.
+- Nếu response trả `[]` (mảng rỗng), kiểm tra `MONGODB_URI` và tên collection (hiện backend đã map các model tới collection trong DB `BIENTUOI_DB`).
+- Tránh chạy `seedData.js` nếu bạn muốn giữ dữ liệu hiện có (seed sẽ xóa và ghi lại dữ liệu).
+
+----
+
+Nếu bạn muốn, tôi có thể:
+- Cập nhật thêm ví dụ response mẫu cho từng endpoint.
+- Export một Postman collection (JSON) để import vào Postman.
 ```
-
-## Test Flow Example
-
-1. **Tạo User mới**
-   ```
-   POST /api/users
-   ```
-
-2. **Tạo Address cho User**
-   ```
-   POST /api/addresses
-   ```
-
-3. **Tạo Product mới**
-   ```
-   POST /api/products
-   ```
-
-4. **Tạo Product Variant**
-   ```
-   POST /api/product-variants
-   ```
-
-5. **Tạo Order**
-   ```
-   POST /api/orders
-   ```
-
-6. **Tạo Payment cho Order**
-   ```
-   POST /api/payments
-   ```
-
-7. **Cập nhật Payment status**
-   ```
-   PUT /api/payments/:id
-   ```
-
-8. **Tạo Review cho Product**
-   ```
-   POST /api/reviews
-   ```
-
-## Lưu ý khi test
-
-- Đảm bảo server đang chạy tại `http://localhost:3000`
-- Sử dụng đúng Content-Type header: `application/json`
-- Kiểm tra response status code:
-  - 200: Success
-  - 201: Created
-  - 400: Bad Request
-  - 404: Not Found
-  - 500: Internal Server Error
-- Dữ liệu seed đã được khởi tạo sẵn, có thể test ngay với các ID có sẵn
 

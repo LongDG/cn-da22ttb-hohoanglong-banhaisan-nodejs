@@ -46,10 +46,10 @@ const orderSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'orders'
+  collection: 'Orders'
 });
 
-// Index (order_id already has unique: true)
+// Chỉ mục (order_id đã có unique: true)
 orderSchema.index({ user_id: 1 });
 orderSchema.index({ status: 1 });
 

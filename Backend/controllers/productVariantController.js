@@ -31,7 +31,7 @@ exports.getProductVariantById = async (req, res) => {
     if (!variant) {
       return res.status(404).json({
         success: false,
-        error: 'Product variant not found'
+        error: 'Không tìm thấy biến thể sản phẩm'
       });
     }
     
@@ -49,33 +49,24 @@ exports.getProductVariantById = async (req, res) => {
 
 exports.createProductVariant = async (req, res) => {
   try {
-    const { product_id, name, price, sale_price, stock_quantity } = req.body;
-    
-    if (!product_id || !name || price === undefined) {
-      return res.status(400).json({
-        success: false,
-        error: 'Product ID, name, and price are required'
-      });
+    const { variant_id, product_id, name, price, sale_price, stock_quantity } = req.body;
+
+    if (!product_id || !name || price === undefined) return res.status(400).json({ success: false, error: 'Cần có product_id, name và price' });
+
+    let finalVariantId;
+    if (variant_id !== undefined && variant_id !== null && variant_id !== '') {
+      const provided = parseInt(variant_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'variant_id phải là số' });
+      const exists = await ProductVariant.findOne({ variant_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'variant_id đã tồn tại' });
+      finalVariantId = provided;
+    } else {
+      const lastVariant = await ProductVariant.findOne().sort({ variant_id: -1 });
+      finalVariantId = lastVariant ? lastVariant.variant_id + 1 : 1;
     }
-    
-    // Get the next variant_id
-    const lastVariant = await ProductVariant.findOne().sort({ variant_id: -1 });
-    const nextVariantId = lastVariant ? lastVariant.variant_id + 1 : 1;
-    
-    const variant = await ProductVariant.create({
-      variant_id: nextVariantId,
-      product_id: parseInt(product_id),
-      name,
-      price: parseFloat(price),
-      sale_price: sale_price ? parseFloat(sale_price) : null,
-      stock_quantity: stock_quantity || 0
-    });
-    
-    res.status(201).json({
-      success: true,
-      data: variant,
-      message: 'Product variant created successfully'
-    });
+
+    const variant = await ProductVariant.create({ variant_id: finalVariantId, product_id: parseInt(product_id), name, price: parseFloat(price), sale_price: sale_price ? parseFloat(sale_price) : null, stock_quantity: stock_quantity || 0 });
+    res.status(201).json({ success: true, data: variant, message: 'Đã tạo biến thể sản phẩm thành công' });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -98,14 +89,14 @@ exports.updateProductVariant = async (req, res) => {
     if (!variant) {
       return res.status(404).json({
         success: false,
-        error: 'Product variant not found'
+        error: 'Không tìm thấy biến thể sản phẩm'
       });
     }
     
     res.json({
       success: true,
       data: variant,
-      message: 'Product variant updated successfully'
+      message: 'Đã cập nhật biến thể sản phẩm thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -123,13 +114,13 @@ exports.deleteProductVariant = async (req, res) => {
     if (!variant) {
       return res.status(404).json({
         success: false,
-        error: 'Product variant not found'
+        error: 'Không tìm thấy biến thể sản phẩm'
       });
     }
     
     res.json({
       success: true,
-      message: 'Product variant deleted successfully'
+      message: 'Đã xóa biến thể sản phẩm thành công'
     });
   } catch (error) {
     res.status(500).json({
