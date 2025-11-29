@@ -29,10 +29,10 @@ const orderItemSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'order_items'
+  collection: 'Order_Items'
 });
 
-// Index (order_item_id already has unique: true)
+// Chỉ mục (order_item_id đã có unique: true)
 orderItemSchema.index({ order_id: 1 });
 orderItemSchema.index({ variant_id: 1 });
 

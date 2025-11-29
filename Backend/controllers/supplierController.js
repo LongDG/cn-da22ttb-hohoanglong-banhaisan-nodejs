@@ -24,7 +24,7 @@ exports.getSupplierById = async (req, res) => {
     if (!supplier) {
       return res.status(404).json({
         success: false,
-        error: 'Supplier not found'
+        error: 'Không tìm thấy nhà cung cấp'
       });
     }
     
@@ -42,30 +42,24 @@ exports.getSupplierById = async (req, res) => {
 
 exports.createSupplier = async (req, res) => {
   try {
-    const { name, contact_info } = req.body;
-    
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        error: 'Supplier name is required'
-      });
+    const { supplier_id, name, contact_info } = req.body;
+
+    if (!name) return res.status(400).json({ success: false, error: 'Tên nhà cung cấp là bắt buộc' });
+
+    let finalSupplierId;
+    if (supplier_id !== undefined && supplier_id !== null && supplier_id !== '') {
+      const provided = parseInt(supplier_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'supplier_id phải là số' });
+      const exists = await Supplier.findOne({ supplier_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'supplier_id đã tồn tại' });
+      finalSupplierId = provided;
+    } else {
+      const lastSupplier = await Supplier.findOne().sort({ supplier_id: -1 });
+      finalSupplierId = lastSupplier ? lastSupplier.supplier_id + 1 : 1;
     }
-    
-    // Get the next supplier_id
-    const lastSupplier = await Supplier.findOne().sort({ supplier_id: -1 });
-    const nextSupplierId = lastSupplier ? lastSupplier.supplier_id + 1 : 1;
-    
-    const supplier = await Supplier.create({
-      supplier_id: nextSupplierId,
-      name,
-      contact_info
-    });
-    
-    res.status(201).json({
-      success: true,
-      data: supplier,
-      message: 'Supplier created successfully'
-    });
+
+    const supplier = await Supplier.create({ supplier_id: finalSupplierId, name, contact_info });
+    res.status(201).json({ success: true, data: supplier, message: 'Đã tạo nhà cung cấp thành công' });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -88,14 +82,14 @@ exports.updateSupplier = async (req, res) => {
     if (!supplier) {
       return res.status(404).json({
         success: false,
-        error: 'Supplier not found'
+        error: 'Không tìm thấy nhà cung cấp'
       });
     }
     
     res.json({
       success: true,
       data: supplier,
-      message: 'Supplier updated successfully'
+      message: 'Đã cập nhật nhà cung cấp thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -113,13 +107,13 @@ exports.deleteSupplier = async (req, res) => {
     if (!supplier) {
       return res.status(404).json({
         success: false,
-        error: 'Supplier not found'
+        error: 'Không tìm thấy nhà cung cấp'
       });
     }
     
     res.json({
       success: true,
-      message: 'Supplier deleted successfully'
+      message: 'Đã xóa nhà cung cấp thành công'
     });
   } catch (error) {
     res.status(500).json({

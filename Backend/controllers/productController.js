@@ -57,21 +57,39 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, image_url, category_id, supplier_id, status } = req.body;
-    
+    const { product_id, name, description, image_url, category_id, supplier_id, status } = req.body;
+
     if (!name || !category_id || !supplier_id) {
       return res.status(400).json({
         success: false,
         error: 'Name, category ID, and supplier ID are required'
       });
     }
-    
-    // Get the next product_id
-    const lastProduct = await Product.findOne().sort({ product_id: -1 });
-    const nextProductId = lastProduct ? lastProduct.product_id + 1 : 1;
-    
+
+    let finalProductId;
+
+    if (product_id !== undefined && product_id !== null && product_id !== '') {
+      // accept provided product_id (from input) and validate
+      const providedId = parseInt(product_id);
+      if (isNaN(providedId)) {
+        return res.status(400).json({ success: false, error: 'product_id must be a number' });
+      }
+
+      // check duplicate
+      const existing = await Product.findOne({ product_id: providedId });
+      if (existing) {
+        return res.status(400).json({ success: false, error: 'product_id already exists' });
+      }
+
+      finalProductId = providedId;
+    } else {
+      // Get the next product_id
+      const lastProduct = await Product.findOne().sort({ product_id: -1 });
+      finalProductId = lastProduct ? lastProduct.product_id + 1 : 1;
+    }
+
     const product = await Product.create({
-      product_id: nextProductId,
+      product_id: finalProductId,
       name,
       description,
       image_url,
@@ -79,11 +97,11 @@ exports.createProduct = async (req, res) => {
       supplier_id: parseInt(supplier_id),
       status: status || 'active'
     });
-    
+
     res.status(201).json({
       success: true,
       data: product,
-      message: 'Product created successfully'
+      message: 'Đã tạo sản phẩm thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -107,14 +125,14 @@ exports.updateProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        error: 'Product not found'
+        error: 'Không tìm thấy sản phẩm'
       });
     }
     
     res.json({
       success: true,
       data: product,
-      message: 'Product updated successfully'
+      message: 'Đã cập nhật sản phẩm thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -132,13 +150,13 @@ exports.deleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        error: 'Product not found'
+        error: 'Không tìm thấy sản phẩm'
       });
     }
     
     res.json({
       success: true,
-      message: 'Product deleted successfully'
+      message: 'Đã xóa sản phẩm thành công'
     });
   } catch (error) {
     res.status(500).json({

@@ -31,7 +31,7 @@ exports.getAddressById = async (req, res) => {
     if (!address) {
       return res.status(404).json({
         success: false,
-        error: 'Address not found'
+        error: 'không tìm thấy địa chỉ'
       });
     }
     
@@ -49,16 +49,16 @@ exports.getAddressById = async (req, res) => {
 
 exports.createAddress = async (req, res) => {
   try {
-    const { user_id, recipient_name, phone_number, full_address, is_default } = req.body;
+    const { address_id, user_id, recipient_name, phone_number, full_address, is_default } = req.body;
     
     if (!user_id || !recipient_name || !full_address) {
       return res.status(400).json({
         success: false,
-        error: 'User ID, recipient name, and full address are required'
+        error: 'Cần có ID người dùng, tên người nhận và địa chỉ đầy đủ'
       });
     }
     
-    // If this is set as default, unset others for the same user
+    // nếu cài đặt này là mặc định, hãy bỏ cài đặt khác cho cùng một người dùng
     if (is_default) {
       await Address.updateMany(
         { user_id: parseInt(user_id) },
@@ -66,24 +66,28 @@ exports.createAddress = async (req, res) => {
       );
     }
     
-    // Get the next address_id
-    const lastAddress = await Address.findOne().sort({ address_id: -1 });
-    const nextAddressId = lastAddress ? lastAddress.address_id + 1 : 1;
-    
+    let finalAddressId;
+    if (address_id !== undefined && address_id !== null && address_id !== '') {
+      const provided = parseInt(address_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'address_id phải là số' });
+      const exists = await Address.findOne({ address_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'address_id đã tồn tại' });
+      finalAddressId = provided;
+    } else {
+      const lastAddress = await Address.findOne().sort({ address_id: -1 });
+      finalAddressId = lastAddress ? lastAddress.address_id + 1 : 1;
+    }
+
     const address = await Address.create({
-      address_id: nextAddressId,
+      address_id: finalAddressId,
       user_id: parseInt(user_id),
       recipient_name,
       phone_number,
       full_address,
       is_default: is_default || false
     });
-    
-    res.status(201).json({
-      success: true,
-      data: address,
-      message: 'Address created successfully'
-    });
+
+    res.status(201).json({ success: true, data: address, message: 'Tạo địa chỉ thành công' });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -97,7 +101,7 @@ exports.updateAddress = async (req, res) => {
     const { id } = req.params;
     const { recipient_name, phone_number, full_address, is_default } = req.body;
     
-    // If this is set as default, unset others for the same user
+    // nếu cài đặt này là mặc định, hãy bỏ cài đặt khác cho cùng một người dùng
     if (is_default) {
       const address = await Address.findOne({ address_id: parseInt(id) });
       if (address) {
@@ -117,14 +121,14 @@ exports.updateAddress = async (req, res) => {
     if (!address) {
       return res.status(404).json({
         success: false,
-        error: 'Address not found'
+        error: 'không tìm thấy địa chỉ'
       });
     }
     
     res.json({
       success: true,
       data: address,
-      message: 'Address updated successfully'
+      message: 'Cập nhật địa chỉ thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -142,13 +146,13 @@ exports.deleteAddress = async (req, res) => {
     if (!address) {
       return res.status(404).json({
         success: false,
-        error: 'Address not found'
+        error: 'không tìm thấy địa chỉ'
       });
     }
     
     res.json({
       success: true,
-      message: 'Address deleted successfully'
+      message: 'Đã xóa địa chỉ thành công'
     });
   } catch (error) {
     res.status(500).json({

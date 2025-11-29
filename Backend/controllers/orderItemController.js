@@ -18,7 +18,7 @@ exports.getOrderItemById = async (req, res) => {
   try {
     const { id } = req.params;
     const item = await OrderItem.findOne({ order_item_id: parseInt(id) });
-    if (!item) return res.status(404).json({ success: false, error: 'Order item not found' });
+    if (!item) return res.status(404).json({ success: false, error: 'Không tìm thấy mục đơn hàng' });
     res.json({ success: true, data: item });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -27,23 +27,23 @@ exports.getOrderItemById = async (req, res) => {
 
 exports.createOrderItem = async (req, res) => {
   try {
-    const { order_id, variant_id, quantity, price_at_purchase } = req.body;
-    if (!order_id || !variant_id || !quantity || price_at_purchase === undefined) {
-      return res.status(400).json({ success: false, error: 'order_id, variant_id, quantity and price_at_purchase are required' });
+    const { order_item_id, order_id, variant_id, quantity, price_at_purchase } = req.body;
+    if (!order_id || !variant_id || !quantity || price_at_purchase === undefined) return res.status(400).json({ success: false, error: 'Cần có order_id, variant_id, quantity và price_at_purchase' });
+
+    let finalOrderItemId;
+    if (order_item_id !== undefined && order_item_id !== null && order_item_id !== '') {
+      const provided = parseInt(order_item_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'order_item_id phải là số' });
+      const exists = await OrderItem.findOne({ order_item_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'order_item_id đã tồn tại' });
+      finalOrderItemId = provided;
+    } else {
+      const last = await OrderItem.findOne().sort({ order_item_id: -1 });
+      finalOrderItemId = last ? last.order_item_id + 1 : 1;
     }
 
-    const last = await OrderItem.findOne().sort({ order_item_id: -1 });
-    const nextId = last ? last.order_item_id + 1 : 1;
-
-    const item = await OrderItem.create({
-      order_item_id: nextId,
-      order_id: parseInt(order_id),
-      variant_id: parseInt(variant_id),
-      quantity: parseInt(quantity),
-      price_at_purchase: parseFloat(price_at_purchase)
-    });
-
-    res.status(201).json({ success: true, data: item, message: 'Order item created successfully' });
+    const item = await OrderItem.create({ order_item_id: finalOrderItemId, order_id: parseInt(order_id), variant_id: parseInt(variant_id), quantity: parseInt(quantity), price_at_purchase: parseFloat(price_at_purchase) });
+    res.status(201).json({ success: true, data: item, message: 'Đã tạo mục đơn hàng thành công' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -59,8 +59,8 @@ exports.updateOrderItem = async (req, res) => {
     if (price_at_purchase !== undefined) update.price_at_purchase = parseFloat(price_at_purchase);
 
     const item = await OrderItem.findOneAndUpdate({ order_item_id: parseInt(id) }, update, { new: true, runValidators: true });
-    if (!item) return res.status(404).json({ success: false, error: 'Order item not found' });
-    res.json({ success: true, data: item, message: 'Order item updated successfully' });
+    if (!item) return res.status(404).json({ success: false, error: 'Không tìm thấy mục đơn hàng' });
+    res.json({ success: true, data: item, message: 'Đã cập nhật mục đơn hàng thành công' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -70,8 +70,8 @@ exports.deleteOrderItem = async (req, res) => {
   try {
     const { id } = req.params;
     const item = await OrderItem.findOneAndDelete({ order_item_id: parseInt(id) });
-    if (!item) return res.status(404).json({ success: false, error: 'Order item not found' });
-    res.json({ success: true, message: 'Order item deleted successfully' });
+    if (!item) return res.status(404).json({ success: false, error: 'Không tìm thấy mục đơn hàng' });
+    res.json({ success: true, message: 'Đã xóa mục đơn hàng thành công' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

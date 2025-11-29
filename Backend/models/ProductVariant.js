@@ -34,10 +34,10 @@ const productVariantSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'product_variants'
+  collection: 'Product_Variants'
 });
 
-// Index (variant_id already has unique: true)
+// Chỉ mục (variant_id đã có unique: true)
 productVariantSchema.index({ product_id: 1 });
 
 const ProductVariant = mongoose.model('ProductVariant', productVariantSchema);

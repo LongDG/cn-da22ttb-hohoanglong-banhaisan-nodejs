@@ -18,7 +18,7 @@ const supplierSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'suppliers'
+  collection: 'Suppliers'
 });
 
 // Index (supplier_id already has unique: true which creates index automatically)

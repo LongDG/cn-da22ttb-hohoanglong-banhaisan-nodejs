@@ -24,7 +24,7 @@ exports.getVoucherById = async (req, res) => {
     if (!voucher) {
       return res.status(404).json({
         success: false,
-        error: 'Voucher not found'
+        error: 'Không tìm thấy voucher'
       });
     }
     
@@ -48,7 +48,7 @@ exports.getVoucherByCode = async (req, res) => {
     if (!voucher) {
       return res.status(404).json({
         success: false,
-        error: 'Voucher not found'
+        error: 'Không tìm thấy voucher'
       });
     }
     
@@ -69,49 +69,29 @@ exports.getVoucherByCode = async (req, res) => {
 
 exports.createVoucher = async (req, res) => {
   try {
-    const { code, discount_type, value, expiry_date, usage_limit } = req.body;
-    
-    if (!code || !discount_type || value === undefined) {
-      return res.status(400).json({
-        success: false,
-        error: 'Code, discount type, and value are required'
-      });
-    }
-    
-    if (discount_type !== 'fixed_amount' && discount_type !== 'percentage') {
-      return res.status(400).json({
-        success: false,
-        error: 'Discount type must be "fixed_amount" or "percentage"'
-      });
-    }
-    
+    const { voucher_id, code, discount_type, value, expiry_date, usage_limit } = req.body;
+
+    if (!code || !discount_type || value === undefined) return res.status(400).json({ success: false, error: 'Mã code, loại giảm giá và giá trị là bắt buộc' });
+    if (discount_type !== 'fixed_amount' && discount_type !== 'percentage') return res.status(400).json({ success: false, error: 'Loại giảm giá phải là "fixed_amount" hoặc "percentage"' });
+
     // Check if code already exists
     const existingVoucher = await Voucher.findOne({ code: code.toUpperCase() });
-    if (existingVoucher) {
-      return res.status(400).json({
-        success: false,
-        error: 'Voucher code already exists'
-      });
+    if (existingVoucher) return res.status(400).json({ success: false, error: 'Mã voucher đã tồn tại' });
+
+    let finalVoucherId;
+    if (voucher_id !== undefined && voucher_id !== null && voucher_id !== '') {
+      const provided = parseInt(voucher_id);
+      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'voucher_id phải là số' });
+      const exists = await Voucher.findOne({ voucher_id: provided });
+      if (exists) return res.status(400).json({ success: false, error: 'voucher_id đã tồn tại' });
+      finalVoucherId = provided;
+    } else {
+      const lastVoucher = await Voucher.findOne().sort({ voucher_id: -1 });
+      finalVoucherId = lastVoucher ? lastVoucher.voucher_id + 1 : 1;
     }
-    
-    // Get the next voucher_id
-    const lastVoucher = await Voucher.findOne().sort({ voucher_id: -1 });
-    const nextVoucherId = lastVoucher ? lastVoucher.voucher_id + 1 : 1;
-    
-    const voucher = await Voucher.create({
-      voucher_id: nextVoucherId,
-      code: code.toUpperCase(),
-      discount_type,
-      value: parseFloat(value),
-      expiry_date: expiry_date ? new Date(expiry_date) : null,
-      usage_limit: usage_limit || null
-    });
-    
-    res.status(201).json({
-      success: true,
-      data: voucher,
-      message: 'Voucher created successfully'
-    });
+
+    const voucher = await Voucher.create({ voucher_id: finalVoucherId, code: code.toUpperCase(), discount_type, value: parseFloat(value), expiry_date: expiry_date ? new Date(expiry_date) : null, usage_limit: usage_limit || null });
+    res.status(201).json({ success: true, data: voucher, message: 'Đã tạo voucher thành công' });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -128,7 +108,7 @@ exports.updateVoucher = async (req, res) => {
     if (discount_type && discount_type !== 'fixed_amount' && discount_type !== 'percentage') {
       return res.status(400).json({
         success: false,
-        error: 'Discount type must be "fixed_amount" or "percentage"'
+        error: 'Loại giảm giá phải là "fixed_amount" hoặc "percentage"'
       });
     }
     
@@ -162,14 +142,14 @@ exports.updateVoucher = async (req, res) => {
     if (!voucher) {
       return res.status(404).json({
         success: false,
-        error: 'Voucher not found'
+        error: 'Không tìm thấy voucher'
       });
     }
     
     res.json({
       success: true,
       data: voucher,
-      message: 'Voucher updated successfully'
+      message: 'Đã cập nhật voucher thành công'
     });
   } catch (error) {
     res.status(500).json({
@@ -187,13 +167,13 @@ exports.deleteVoucher = async (req, res) => {
     if (!voucher) {
       return res.status(404).json({
         success: false,
-        error: 'Voucher not found'
+        error: 'Không tìm thấy voucher'
       });
     }
     
     res.json({
       success: true,
-      message: 'Voucher deleted successfully'
+      message: 'Đã xóa voucher thành công'
     });
   } catch (error) {
     res.status(500).json({

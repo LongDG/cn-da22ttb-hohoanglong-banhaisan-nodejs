@@ -37,7 +37,7 @@ npm run seed
 3. **Kiểm tra connection**: Server sẽ hiển thị:
    ```
    MongoDB Connected: localhost
-   Database: ecommerce
+   Database: ecommerce              sai ten database
    Server is running on port 3000
    ```
 

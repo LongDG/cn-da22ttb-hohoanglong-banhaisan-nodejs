@@ -19,10 +19,10 @@ const categorySchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'categories'
+  collection: 'Categories'
 });
 
-// Index for faster queries (category_id already has unique: true)
+// Chỉ mục cho các truy vấn nhanh hơn (category_id đã có unique: true)
 categorySchema.index({ parent_id: 1 });
 
 const Category = mongoose.model('Category', categorySchema);

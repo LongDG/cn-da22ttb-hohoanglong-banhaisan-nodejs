@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Address Schema
+// Address Schema lược đồ địa chỉ
 const addressSchema = new mongoose.Schema({
   address_id: {
     type: Number,
@@ -31,10 +31,10 @@ const addressSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'addresses'
+  collection: 'Addresses'
 });
 
-// Index for faster queries (address_id already has unique: true)
+// Chỉ mục cho các truy vấn nhanh hơn (address_id đã có unique: true)
 addressSchema.index({ user_id: 1 });
 
 const Address = mongoose.model('Address', addressSchema);

@@ -37,10 +37,10 @@ const productSchema = new mongoose.Schema({
   }
 }, {
   timestamps: false,
-  collection: 'products'
+  collection: 'Products'
 });
 
-// Index (product_id already has unique: true)
+// Chỉ mục (product_id đã có unique: true)
 productSchema.index({ category_id: 1 });
 productSchema.index({ supplier_id: 1 });
 productSchema.index({ status: 1 });
