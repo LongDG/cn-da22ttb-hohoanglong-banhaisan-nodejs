@@ -7,23 +7,33 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node seedData.js",
+    "start:memory": "node server-memory.js",
+    "dev:memory": "nodemon server-memory.js",
+    "seed:memory": "node seedData-memory.js",
     "test-db": "node test-api.js",
+    "test-login": "node test-login.js",
+    "test-seed-login": "node test-seed-and-login.js",
     "check-server": "node CHECK_SERVER.js"
   },
-  "keywords": ["mvc", "express", "backend"],
+  "keywords": [
+    "mvc",
+    "express",
+    "backend"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
+    "axios": "^1.13.2",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "mongoose": "^8.0.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.0"
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^8.0.0"
   },
   "devDependencies": {
+    "mongodb-memory-server": "^9.5.0",
     "nodemon": "^3.0.1"
   }
 }
-

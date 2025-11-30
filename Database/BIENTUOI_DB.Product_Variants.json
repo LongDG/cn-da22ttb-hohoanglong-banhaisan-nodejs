@@ -1,0 +1,66 @@
+[{
+  "_id": {
+    "$oid": "6927fb86f5a9cecb4c6d235e"
+  },
+  "variant_id": 1,
+  "product_id": 1001,
+  "name": "Size 3 con/kg (Y3)",
+  "price": 450000,
+  "sale_price": null,
+  "stock_quantity": 50
+},
+{
+  "_id": {
+    "$oid": "6927fb8ff5a9cecb4c6d235f"
+  },
+  "variant_id": 2,
+  "product_id": 1001,
+  "name": "Size 2 con/kg (Y5 - Cua Cối)",
+  "price": 650000,
+  "sale_price": 590000,
+  "stock_quantity": 30
+},
+{
+  "_id": {
+    "$oid": "6927fba5f5a9cecb4c6d2360"
+  },
+  "variant_id": 3,
+  "product_id": 1002,
+  "name": "Size 1kg - 1.5kg/con",
+  "price": 1250000,
+  "sale_price": null,
+  "stock_quantity": 15
+},
+{
+  "_id": {
+    "$oid": "6927fbfbf5a9cecb4c6d2361"
+  },
+  "variant_id": 3,
+  "product_id": 1002,
+  "name": "Size 1kg - 1.5kg/con",
+  "price": 1250000,
+  "sale_price": null,
+  "stock_quantity": 15
+},
+{
+  "_id": {
+    "$oid": "6927fc2ef5a9cecb4c6d2362"
+  },
+  "variant_id": 4,
+  "product_id": 1002,
+  "name": "Size Khủng 2kg - 3kg/con",
+  "price": 2800000,
+  "sale_price": 2600000,
+  "stock_quantity": 5
+},
+{
+  "_id": {
+    "$oid": "6927fc49f5a9cecb4c6d2363"
+  },
+  "variant_id": 5,
+  "product_id": 1003,
+  "name": "Túi 1kg (2-3 con)",
+  "price": 420000,
+  "sale_price": null,
+  "stock_quantity": 100
+}]

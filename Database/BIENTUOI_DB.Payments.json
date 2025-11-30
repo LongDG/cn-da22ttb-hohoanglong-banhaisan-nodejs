@@ -1,0 +1,22 @@
+[{
+  "_id": {
+    "$oid": "6927fd51f5a9cecb4c6d236e"
+  },
+  "payment_id": 1,
+  "order_id": 9001,
+  "amount": 1335000,
+  "payment_method": "COD",
+  "status": "successful",
+  "transaction_id": null
+},
+{
+  "_id": {
+    "$oid": "6927fd5ef5a9cecb4c6d236f"
+  },
+  "payment_id": 2,
+  "order_id": 9002,
+  "amount": 2770000,
+  "payment_method": "VNPay",
+  "status": "successful",
+  "transaction_id": "VNP12345678"
+}]

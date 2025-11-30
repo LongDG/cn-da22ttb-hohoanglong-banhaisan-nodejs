@@ -1,4 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import CartBadge from '../components/CartBadge';
 import '../styles/storefront.css';
 
 const NAV_LINKS = [
@@ -9,6 +11,24 @@ const NAV_LINKS = [
 
 const PublicLayout = () => {
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('seafresh_token');
+      const userStr = localStorage.getItem('seafresh_user');
+      const userData = userStr ? JSON.parse(userStr) : null;
+      
+      setIsLoggedIn(!!token && !!userData);
+      setUser(userData);
+    };
+
+    checkAuth();
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
 
   return (
     <div className="public-layout">
@@ -31,9 +51,39 @@ const PublicLayout = () => {
         </nav>
 
         <div className="header-actions">
-          <Link to="/auth?mode=login" className="primary-btn">
-            Đăng nhập
-          </Link>
+          {/* Giỏ hàng: icon + badge (giữ CartBadge) */}
+          <CartBadge />
+          {isLoggedIn ? (
+            <>
+              <span className="header-greeting">
+                Xin chào, {user?.full_name || user?.email || 'bạn'}
+              </span>
+              {/* Tài khoản: icon tròn */}
+              <Link
+                to="/customer"
+                className="icon-btn tooltip"
+                data-label="Tài khoản"
+                aria-label="Tài khoản"
+                title="Tài khoản"
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="8" r="3.5" stroke="#cbd5f5" strokeWidth="1.8"/>
+                  <path d="M4.5 19c1.8-3.5 5.3-5 7.5-5s5.7 1.5 7.5 5" stroke="#cbd5f5" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              </Link>
+            </>
+          ) : (
+            <Link to="/auth?mode=login" className="primary-btn">
+              Đăng nhập
+            </Link>
+          )}
         </div>
       </header>
 

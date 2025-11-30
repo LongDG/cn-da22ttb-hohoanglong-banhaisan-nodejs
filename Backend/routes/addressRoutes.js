@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const addressController = require('../controllers/addressController');
+const { authenticate } = require('../middleware/auth');
 
-router.get('/', addressController.getAllAddresses);
-router.get('/:id', addressController.getAddressById);
-router.post('/', addressController.createAddress);
-router.put('/:id', addressController.updateAddress);
-router.delete('/:id', addressController.deleteAddress);
+// Get addresses - if authenticated, auto-filter by user_id
+router.get('/', authenticate, addressController.getAllAddresses);
+router.get('/:id', authenticate, addressController.getAddressById);
+router.post('/', authenticate, addressController.createAddress);
+router.put('/:id', authenticate, addressController.updateAddress);
+router.delete('/:id', authenticate, addressController.deleteAddress);
 
 module.exports = router;
 

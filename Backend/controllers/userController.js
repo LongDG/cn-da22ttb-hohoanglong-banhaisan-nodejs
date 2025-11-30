@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -72,11 +73,15 @@ exports.createUser = async (req, res) => {
       finalUserId = lastUser ? lastUser.user_id + 1 : 1;
     }
 
+    // Hash password trước khi lưu
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const user = await User.create({
       user_id: finalUserId,
       full_name,
       email,
-      password,
+      password: hashedPassword,
       phone_number,
       role: role || 'customer'
     });
@@ -95,9 +100,17 @@ exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { full_name, email, password, phone_number, role } = req.body;
     
+    const updateData = { full_name, email, phone_number, role };
+    
+    // Chỉ hash password nếu có cung cấp password mới
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+    
     const user = await User.findOneAndUpdate(
       { user_id: parseInt(id) },
-      { full_name, email, password, phone_number, role },
+      updateData,
       { new: true, runValidators: true }
     );
     
@@ -108,9 +121,13 @@ exports.updateUser = async (req, res) => {
       });
     }
     
+    // Xóa password khỏi response
+    const userObj = user.toObject();
+    delete userObj.password;
+    
     res.json({
       success: true,
-      data: user,
+      data: userObj,
       message: 'Cập nhật người dùng thành công'
     });
   } catch (error) {

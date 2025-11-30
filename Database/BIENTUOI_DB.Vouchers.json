@@ -1,0 +1,22 @@
+[{
+  "_id": {
+    "$oid": "6927fc9ff5a9cecb4c6d2365"
+  },
+  "voucher_id": 1,
+  "code": "KHAYTRUONG",
+  "discount_type": "percentage",
+  "value": 10,
+  "expiry_date": "2025-12-31T23:59:59Z",
+  "usage_limit": 500
+},
+{
+  "_id": {
+    "$oid": "6927fcc5f5a9cecb4c6d2366"
+  },
+  "voucher_id": 2,
+  "code": "FREESHIP_HCM",
+  "discount_type": "fixed_amount",
+  "value": 30000,
+  "expiry_date": "2025-06-30T23:59:59Z",
+  "usage_limit": 1000
+}]

@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
+const { authenticate, requireAdmin } = require('../middleware/auth');
 
-router.get('/', orderController.getAllOrders);
-router.get('/:id', orderController.getOrderById);
-router.post('/', orderController.createOrder);
-router.put('/:id', orderController.updateOrder);
-router.delete('/:id', orderController.deleteOrder);
+// Authenticated routes (customer can see their own orders, admin can see all)
+router.get('/', authenticate, orderController.getAllOrders);
+router.get('/:id', authenticate, orderController.getOrderById);
+router.post('/', authenticate, orderController.createOrder);
+
+// Admin only routes
+router.put('/:id', authenticate, requireAdmin, orderController.updateOrder);
+router.delete('/:id', authenticate, requireAdmin, orderController.deleteOrder);
 
 module.exports = router;
 
