@@ -45,8 +45,8 @@ const StorefrontPage = () => {
     );
   }, [catalog, selectedCategory, searchTerm]);
 
-  const heroProduct = filteredProducts[0];
-  const spotlight = filteredProducts.slice(1, 4);
+  const heroProduct = filteredProducts.length > 0 ? filteredProducts[0] : null;
+  const spotlight = filteredProducts.length > 1 ? filteredProducts.slice(1, 4) : [];
 
   return (
     <div className="storefront">

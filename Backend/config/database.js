@@ -1,10 +1,19 @@
 const mongoose = require('mongoose');
 
+// Tắt auto create/index collection (tránh cảnh báo duplicate index)
 mongoose.set('autoCreate', false);
 mongoose.set('autoIndex', false);
+// Tắt cảnh báo strictQuery (MongoDB 7+)
+mongoose.set('strictQuery', false);
 
 const connectDB = async () => {
   try {
+    // Nếu USE_MEMORY_DB=true, sử dụng in-memory database
+    if (process.env.USE_MEMORY_DB === 'true') {
+      const { connectDBMemory } = require('./database-memory');
+      return await connectDBMemory();
+    }
+    
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/BIENTUOI_DB';
     
     // Check if already connected

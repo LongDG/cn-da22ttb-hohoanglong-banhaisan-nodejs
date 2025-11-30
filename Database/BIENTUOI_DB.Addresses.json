@@ -1,0 +1,34 @@
+[{
+  "_id": {
+    "$oid": "6911a51a7118cc1682f668fe"
+  },
+  "address_id": 1,
+  "user_id": 1,
+  "recipient_name": "Nguyễn Văn Bi",
+  "phone_number": "0909123456",
+  "full_address": "Số 284, Đường Đồng khởi, Phường 6,Vĩnh Long ",
+  "is_default": true
+},
+{
+  "_id": {
+    "$oid": "6911a52b7118cc1682f668ff"
+  },
+  "address_id": 2,
+  "user_id": 1,
+  "recipient_name": "Nguyễn Văn Bi",
+  "phone_number": "0909123456",
+  "full_address": "Số 14 Ấp hai thủ, Long Hòa, Châu thành,Vĩnh Long",
+  "is_default": false
+},
+{
+  "_id": {
+    "$oid": "692930b572a645ecccb3c091"
+  },
+  "address_id": 3,
+  "user_id": 1,
+  "recipient_name": "Nguyễn Văn A",
+  "phone_number": "0909123456",
+  "full_address": "Số 789, Đường DEF, Quận 3, TP.HCM",
+  "is_default": false,
+  "__v": 0
+}]

@@ -1,0 +1,70 @@
+[{
+  "_id": {
+    "$oid": "6911a3eb7118cc1682f668f6"
+  },
+  "user_id": 1,
+  "full_name": "Nguyễn Văn Bi",
+  "email": "nguyenvanbi@gmail.com",
+  "password": "12345",
+  "phone_number": "0909123456",
+  "role": "customer",
+  "created_at": {
+    "$date": "2025-11-10T08:30:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "6911a4b57118cc1682f668fd"
+  },
+  "user_id": 2,
+  "full_name": "Hồ Hoàng Long",
+  "email": "110122107ts@gmail.com",
+  "password": "$2a$10$EZd6XLWm0CDGSLEc8WRl1O2Z9mtlQpe7rvw7HCdEMgcsLe1RpdTPK",
+  "phone_number": "0383277120",
+  "role": "admin",
+  "created_at": {
+    "$date": "2025-11-09T09:15:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69280f23f5a9cecb4c6d237a"
+  },
+  "user_id": 3,
+  "full_name": "Võ Nhật Duy Nam",
+  "email": "namvo.it@gmail.com",
+  "password": "12345",
+  "phone_number": "0379648264",
+  "role": "customer",
+  "created_at": "2024-06-20T14:15:00.000Z"
+},
+{
+  "_id": {
+    "$oid": "69294f2e4129694343440ef2"
+  },
+  "user_id": 100,
+  "full_name": "Nguyễn A",
+  "email": "nguyena@example.com",
+  "password": "$2a$10$RPpY.TSR34UKt9qOmA.pg.iEkj2TxgxTyIW3/dV6WESiJhFZ83QcC",
+  "phone_number": "0909123456",
+  "role": "customer",
+  "created_at": {
+    "$date": "2025-11-28T07:28:46.649Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "692996d4148b33bb0873abc2"
+  },
+  "user_id": 101,
+  "full_name": "long",
+  "email": "110122107@st.tvu.edu.vn",
+  "password": "$2a$10$EZd6XLWm0CDGSLEc8WRl1O2Z9mtlQpe7rvw7HCdEMgcsLe1RpdTPK",
+  "phone_number": "0383277120",
+  "role": "customer",
+  "created_at": {
+    "$date": "2025-11-28T12:34:28.917Z"
+  },
+  "__v": 0
+}]

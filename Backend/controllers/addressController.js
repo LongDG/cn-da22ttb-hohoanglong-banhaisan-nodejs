@@ -2,7 +2,8 @@ const Address = require('../models/Address');
 
 exports.getAllAddresses = async (req, res) => {
   try {
-    const { userId } = req.query;
+    // If user is authenticated, use their user_id (security: users can only see their own addresses)
+    const userId = req.user ? req.user.user_id : req.query.userId;
     let query = {};
     
     if (userId) {
@@ -51,7 +52,10 @@ exports.createAddress = async (req, res) => {
   try {
     const { address_id, user_id, recipient_name, phone_number, full_address, is_default } = req.body;
     
-    if (!user_id || !recipient_name || !full_address) {
+    // Use authenticated user's ID if available (security)
+    const finalUserId = req.user ? req.user.user_id : user_id;
+    
+    if (!finalUserId || !recipient_name || !full_address) {
       return res.status(400).json({
         success: false,
         error: 'Cần có ID người dùng, tên người nhận và địa chỉ đầy đủ'
@@ -61,7 +65,7 @@ exports.createAddress = async (req, res) => {
     // nếu cài đặt này là mặc định, hãy bỏ cài đặt khác cho cùng một người dùng
     if (is_default) {
       await Address.updateMany(
-        { user_id: parseInt(user_id) },
+        { user_id: parseInt(finalUserId) },
         { is_default: false }
       );
     }
@@ -80,7 +84,7 @@ exports.createAddress = async (req, res) => {
 
     const address = await Address.create({
       address_id: finalAddressId,
-      user_id: parseInt(user_id),
+      user_id: parseInt(finalUserId),
       recipient_name,
       phone_number,
       full_address,

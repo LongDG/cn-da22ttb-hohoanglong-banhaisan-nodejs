@@ -2,7 +2,11 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
+// Bắt buộc phải có JWT_SECRET - không fallback để tránh dùng secret yếu
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET chưa được thiết lập. Thêm vào file .env (ví dụ JWT_SECRET=your_strong_secret).');
+}
 
 exports.register = async (req, res) => {
   try {

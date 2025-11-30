@@ -122,6 +122,11 @@
   color: #0284c7;
 }
 
+.logo-mark.large:hover {
+  transform: scale(1.05);
+  background: #bae6fd;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;

@@ -1,0 +1,75 @@
+[{
+  "_id": {
+    "$oid": "6927f969f5a9cecb4c6d2347"
+  },
+  "product_id": 1001,
+  "name": "Cua Thịt Cà Mau Chính Gốc (Dây Trói Không Trọng Lượng)",
+  "description": "Cua Cà Mau nổi tiếng với thịt chắc, ngọt và gạch béo. Cam kết dây trói siêu nhỏ, bao ăn 1 đổi 1 nếu ốp.",
+  "image_url": "",
+  "category_id": 10,
+  "supplier_id": 501,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "6927f97af5a9cecb4c6d2348"
+  },
+  "product_id": 1002,
+  "name": "Tôm Hùm Alaska Tươi Sống (Nhập Khẩu)",
+  "description": "Tôm hùm Canada sống khỏe, size khủng, thịt trắng dai giòn sần sật. Thích hợp làm sashimi hoặc nướng phô mai.",
+  "image_url": "",
+  "category_id": 21,
+  "supplier_id": 503,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "6927f995f5a9cecb4c6d2349"
+  },
+  "product_id": 1003,
+  "name": "Mực Một Nắng Phan Thiết (Loại 1)",
+  "description": "Mực ống câu phơi đúng một nắng giòn sần sật, dày cơm, ngọt lịm. Đóng gói hút chân không lịch sự.",
+  "image_url": "",
+  "category_id": 30,
+  "supplier_id": 502,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "69293d569656ceb46914e292"
+  },
+  "product_id": 1004,
+  "name": "Cua Thịt Cà Mau Chính Gốc (Dây Trói Không Trọng Lượng)",
+  "description": "Cua Cà Mau nổi tiếng với thịt chắc, ngọt và gạch béo. Cam kết dây trói siêu nhỏ, bao ăn 1 đổi 1 nếu ốp.",
+  "image_url": "",
+  "category_id": 10,
+  "supplier_id": 501,
+  "status": "active",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "692947229656ceb46914e296"
+  },
+  "product_id": 1005,
+  "name": "Cua Thịt Cà Mau Chính Gốc (Dây Trói Không Trọng Lượng)",
+  "description": "Cua Cà Mau nổi tiếng với thịt chắc, ngọt và gạch béo. Cam kết dây trói siêu nhỏ, bao ăn 1 đổi 1 nếu ốp.",
+  "image_url": "",
+  "category_id": 10,
+  "supplier_id": 501,
+  "status": "active",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "692947f39656ceb46914e29e"
+  },
+  "product_id": 1007,
+  "name": "Tôm Hùm Alaska Tươi Sống (Nhập Khẩu)",
+  "description": "Tôm hùm Canada sống khỏe, size khủng, thịt trắng dai giòn sần sật. Thích hợp làm sashimi hoặc nướng phô mai.",
+  "image_url": "",
+  "category_id": 21,
+  "supplier_id": 503,
+  "status": "active",
+  "__v": 0
+}]

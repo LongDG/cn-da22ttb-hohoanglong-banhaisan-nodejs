@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import '../styles/auth.css';
 import AuthForm from '../components/AuthForm';
 import authController from '../controllers/authController';
+import { syncLocalCartToDatabase } from '../services/cartService';
 
 const AuthPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,6 +50,14 @@ const AuthPage = () => {
         localStorage.setItem('seafresh_token', result.token);
         localStorage.setItem('seafresh_user', JSON.stringify(result.user || {}));
 
+        // Sync localStorage cart to database after login
+        try {
+          await syncLocalCartToDatabase();
+        } catch (error) {
+          console.error('Error syncing cart:', error);
+          // Don't block login if cart sync fails
+        }
+
         const role = result.user?.role === 'admin' ? 'admin' : 'customer';
         navigate(role === 'admin' ? '/admin' : '/customer', { replace: true });
         return;
@@ -87,9 +96,11 @@ const AuthPage = () => {
         <div className="auth-panel">
           <div className="auth-panel__card">
             <div className="auth-panel__head">
-              <div className="logo-mark large" aria-label="SeaFresh logo">
-                <span role="img" aria-hidden="true">🌊</span>
-              </div>
+              <Link to="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                <div className="logo-mark large" aria-label="SeaFresh logo" style={{ cursor: 'pointer', transition: 'transform 0.2s ease' }}>
+                  <span role="img" aria-hidden="true">🌊</span>
+                </div>
+              </Link>
               <h2>{mode === 'login' ? 'Đăng nhập' : 'Đăng ký tài khoản'}</h2>
               <p>{mode === 'login' ? 'Nhập thông tin của bạn để truy cập tài khoản.' : heroCopy}</p>
             </div>
