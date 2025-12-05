@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 // Payment Schema
 const paymentSchema = new mongoose.Schema({
   payment_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   order_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'Order'
   },
@@ -20,12 +20,18 @@ const paymentSchema = new mongoose.Schema({
   payment_method: {
     type: String,
     required: true,
+    enum: ['COD', 'Momo', 'Bank Transfer', 'Credit Card'],
     trim: true
   },
   status: {
     type: String,
-    enum: ['pending', 'successful', 'failed', 'cancelled'],
+    enum: ['pending', 'successful', 'failed', 'cancelled', 'Chưa thanh toán', 'Đã thanh toán'],
     default: 'pending'
+  },
+  payment_status: {
+    type: String,
+    enum: ['Chưa thanh toán', 'Đã thanh toán', 'pending', 'successful', 'failed'],
+    default: 'Chưa thanh toán'
   },
   transaction_id: {
     type: String,

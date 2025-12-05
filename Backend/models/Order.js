@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 // Order Schema
 const orderSchema = new mongoose.Schema({
   order_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   user_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'User'
   },
@@ -18,8 +18,22 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled'],
-    default: 'pending'
+    enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled', 'Chờ xác nhận', 'Chờ giao', 'Hoàn tất'],
+    default: 'Chờ xác nhận'
+  },
+  payment_status: {
+    type: String,
+    enum: ['Chưa thanh toán', 'Đã thanh toán', 'pending', 'successful', 'failed'],
+    default: 'Chưa thanh toán'
+  },
+  payment_method: {
+    type: String,
+    enum: ['COD', 'Momo', 'Bank Transfer', 'Credit Card'],
+    default: 'COD'
+  },
+  distance_km: {
+    type: Number,
+    min: 0
   },
   shipping_address: {
     type: String,

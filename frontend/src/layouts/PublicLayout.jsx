@@ -13,6 +13,7 @@ const PublicLayout = () => {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -29,6 +30,15 @@ const PublicLayout = () => {
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('seafresh_token');
+    localStorage.removeItem('seafresh_user');
+    setIsLoggedIn(false);
+    setUser(null);
+    setAccountMenuOpen(false);
+    window.location.href = '/';
+  };
 
   return (
     <div className="public-layout">
@@ -58,26 +68,61 @@ const PublicLayout = () => {
               <span className="header-greeting">
                 Xin chào, {user?.full_name || user?.email || 'bạn'}
               </span>
-              {/* Tài khoản: icon tròn */}
-              <Link
-                to="/customer"
-                className="icon-btn tooltip"
-                data-label="Tài khoản"
-                aria-label="Tài khoản"
-                title="Tài khoản"
-              >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
+              {/* Tài khoản: icon tròn với dropdown */}
+              <div className="account-wrapper">
+                <button
+                  className="icon-btn tooltip"
+                  data-label="Tài khoản"
+                  aria-label="Tài khoản"
+                  title="Tài khoản"
+                  onClick={() => setAccountMenuOpen(!accountMenuOpen)}
                 >
-                  <circle cx="12" cy="8" r="3.5" stroke="#cbd5f5" strokeWidth="1.8"/>
-                  <path d="M4.5 19c1.8-3.5 5.3-5 7.5-5s5.7 1.5 7.5 5" stroke="#cbd5f5" strokeWidth="1.8" strokeLinecap="round"/>
-                </svg>
-              </Link>
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="8" r="3.5" stroke="#cbd5f5" strokeWidth="1.8"/>
+                    <path d="M4.5 19c1.8-3.5 5.3-5 7.5-5s5.7 1.5 7.5 5" stroke="#cbd5f5" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                {accountMenuOpen && (
+                  <div className="account-dropdown">
+                    <Link
+                      to="/customer/profile"
+                      className="dropdown-item"
+                      onClick={() => setAccountMenuOpen(false)}
+                    >
+                      Tài khoản
+                    </Link>
+                    <Link
+                      to="/customer/orders"
+                      className="dropdown-item"
+                      onClick={() => setAccountMenuOpen(false)}
+                    >
+                      Đơn hàng
+                    </Link>
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        className="dropdown-item"
+                        onClick={() => setAccountMenuOpen(false)}
+                      >
+                        Quay lại admin
+                      </Link>
+                    )}
+                    <button
+                      className="dropdown-item logout-btn"
+                      onClick={handleLogout}
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <Link to="/auth?mode=login" className="primary-btn">

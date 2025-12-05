@@ -13,8 +13,13 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('seafresh_token');
+    console.log('[API CLIENT] Request to:', config.url);
+    console.log('[API CLIENT] Token exists:', !!token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('[API CLIENT] Authorization header set:', config.headers.Authorization.substring(0, 30) + '...');
+    } else {
+      console.warn('[API CLIENT] ⚠️  NO TOKEN FOUND IN LOCALSTORAGE');
     }
     return config;
   },
@@ -27,13 +32,17 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
+    console.log('[API CLIENT] Response error:', error?.response?.status, error?.response?.data?.error);
+    
     // Xử lý lỗi 401 (Unauthorized) - token hết hạn hoặc không hợp lệ
     // Chỉ redirect khi đang ở protected routes (admin hoặc customer)
     if (error?.response?.status === 401) {
+      console.warn('[API CLIENT] ❌ 401 Unauthorized - Token invalid or expired');
       const currentPath = window.location.pathname;
       const isProtectedRoute = currentPath.startsWith('/admin') || currentPath.startsWith('/customer');
       
       if (isProtectedRoute) {
+        console.log('[API CLIENT] Removing token and redirecting to /auth');
         localStorage.removeItem('seafresh_token');
         localStorage.removeItem('seafresh_user');
         // Chỉ redirect khi đang ở protected route
@@ -46,6 +55,7 @@ apiClient.interceptors.response.use(
         const token = localStorage.getItem('seafresh_token');
         if (token) {
           // Token không hợp lệ nhưng đang ở public route, chỉ xóa token
+          console.log('[API CLIENT] Removing invalid token on public route');
           localStorage.removeItem('seafresh_token');
           localStorage.removeItem('seafresh_user');
         }

@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 // Cart Schema
 const cartSchema = new mongoose.Schema({
   cart_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   user_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'User',
     unique: true

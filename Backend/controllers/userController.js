@@ -20,7 +20,7 @@ exports.getAllUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findOne({ user_id: parseInt(id) });
+    const user = await User.findOne({ user_id: id });
     
     if (!user) {
       return res.status(404).json({
@@ -63,14 +63,23 @@ exports.createUser = async (req, res) => {
 
     let finalUserId;
     if (user_id !== undefined && user_id !== null && user_id !== '') {
-      const provided = parseInt(user_id);
-      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'user_id phải là số' });
-      const exists = await User.findOne({ user_id: provided });
+      const exists = await User.findOne({ user_id: user_id });
       if (exists) return res.status(400).json({ success: false, error: 'user_id đã tồn tại' });
-      finalUserId = provided;
+      finalUserId = user_id;
     } else {
+      // Auto-generate user_id
       const lastUser = await User.findOne().sort({ user_id: -1 });
-      finalUserId = lastUser ? lastUser.user_id + 1 : 1;
+      if (lastUser && lastUser.user_id) {
+        const lastId = lastUser.user_id;
+        if (typeof lastId === 'string' && lastId.startsWith('U')) {
+          const num = parseInt(lastId.substring(1));
+          finalUserId = 'U' + (num + 1);
+        } else {
+          finalUserId = 'U001';
+        }
+      } else {
+        finalUserId = 'U001';
+      }
     }
 
     // Hash password trước khi lưu
@@ -109,7 +118,7 @@ exports.updateUser = async (req, res) => {
     }
     
     const user = await User.findOneAndUpdate(
-      { user_id: parseInt(id) },
+      { user_id: id },
       updateData,
       { new: true, runValidators: true }
     );
@@ -141,7 +150,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findOneAndDelete({ user_id: parseInt(id) });
+    const user = await User.findOneAndDelete({ user_id: id });
     
     if (!user) {
       return res.status(404).json({

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // Voucher Schema
 const voucherSchema = new mongoose.Schema({
   voucher_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },

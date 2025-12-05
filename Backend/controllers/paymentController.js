@@ -98,21 +98,28 @@ exports.updatePayment = async (req, res) => {
       });
     }
     
-    // If payment is successful, update order status
+    // Nếu thanh toán thành công → cập nhật order sang "completed"
     if (status === 'successful') {
-      const order = await Order.findOne({ order_id: payment.order_id });
-      if (order && order.status === 'pending') {
-        await Order.findOneAndUpdate(
-          { order_id: payment.order_id },
-          { status: 'processing' }
-        );
+      const order = await Order.findOneAndUpdate(
+        { order_id: payment.order_id },
+        { status: 'completed' },
+        { new: true }
+      );
+      
+      if (order) {
+        return res.json({
+          success: true,
+          data: payment,
+          order: order,
+          message: 'Thanh toán thành công! Đơn hàng đã được hoàn tất.'
+        });
       }
     }
     
     res.json({
-      success: true,  
+      success: true,
       data: payment,
-      message: 'Đã cập nhật thanh toán thành công'
+      message: 'Cập nhật thanh toán thành công'
     });
   } catch (error) {
     res.status(500).json({

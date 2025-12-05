@@ -3,17 +3,17 @@ const mongoose = require('mongoose');
 // CartItem Schema
 const cartItemSchema = new mongoose.Schema({
   cart_item_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   cart_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'Cart'
   },
   variant_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'ProductVariant'
   },

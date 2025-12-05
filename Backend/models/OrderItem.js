@@ -3,17 +3,17 @@ const mongoose = require('mongoose');
 // OrderItem Schema
 const orderItemSchema = new mongoose.Schema({
   order_item_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   order_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'Order'
   },
   variant_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'ProductVariant'
   },

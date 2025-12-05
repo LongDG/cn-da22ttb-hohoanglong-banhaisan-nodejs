@@ -5,8 +5,11 @@ exports.getAllCategories = async (req, res) => {
     const { parentId } = req.query;
     let query = {};
     
-    if (parentId) {
-      query.parent_id = parseInt(parentId);
+    if (parentId && parentId !== 'undefined' && parentId !== 'null') {
+      const parsedId = parseInt(parentId);
+      if (!isNaN(parsedId)) {
+        query.parent_id = parsedId;
+      }
     }
     
     const categories = await Category.find(query).sort({ category_id: 1 });
@@ -26,7 +29,23 @@ exports.getAllCategories = async (req, res) => {
 exports.getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
-    const category = await Category.findOne({ category_id: parseInt(id) });
+    
+    if (!id || id === 'undefined' || id === 'null') {
+      return res.status(400).json({
+        success: false,
+        error: 'ID danh mục không hợp lệ'
+      });
+    }
+    
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID danh mục phải là số'
+      });
+    }
+    
+    const category = await Category.findOne({ category_id: parsedId });
     
     if (!category) {
       return res.status(404).json({
@@ -80,9 +99,24 @@ exports.updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name, parent_id } = req.body;
     
+    if (!id || id === 'undefined' || id === 'null') {
+      return res.status(400).json({
+        success: false,
+        error: 'ID danh mục không hợp lệ'
+      });
+    }
+    
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID danh mục phải là số'
+      });
+    }
+    
     const category = await Category.findOneAndUpdate(
-      { category_id: parseInt(id) },
-      { name, parent_id },
+      { category_id: parsedId },
+      { name, parent_id: parent_id || null },
       { new: true, runValidators: true }
     );
     

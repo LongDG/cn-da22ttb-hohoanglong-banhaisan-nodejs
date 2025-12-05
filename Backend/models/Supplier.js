@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // Supplier Schema
 const supplierSchema = new mongoose.Schema({
   supplier_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },

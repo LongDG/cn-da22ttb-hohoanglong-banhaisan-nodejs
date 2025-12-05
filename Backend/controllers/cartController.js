@@ -92,7 +92,7 @@ exports.addItemToCart = async (req, res) => {
     }
     
     // Check if variant exists
-    const variant = await ProductVariant.findOne({ variant_id: parseInt(variant_id) });
+    const variant = await ProductVariant.findOne({ variant_id: variant_id });
     if (!variant) {
       return res.status(404).json({
         success: false,

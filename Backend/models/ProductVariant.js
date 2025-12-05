@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 // ProductVariant Schema
 const productVariantSchema = new mongoose.Schema({
   variant_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   product_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'Product'
   },

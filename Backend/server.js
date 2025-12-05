@@ -30,6 +30,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const voucherRoutes = require('./routes/voucherRoutes');
 const authRoutes = require('./routes/authRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const shippingRoutes = require('./routes/shippingRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/addresses', addressRoutes);
@@ -44,6 +45,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/carts', cartRoutes);
+app.use('/api/shipping', shippingRoutes);
 
 // Root route
 app.get('/', (req, res) => {
@@ -62,7 +64,8 @@ app.get('/', (req, res) => {
       orders: '/api/orders',
       payments: '/api/payments',
       vouchers: '/api/vouchers',
-      carts: '/api/carts'
+      carts: '/api/carts',
+      shipping: '/api/shipping'
     }
   });
 });
