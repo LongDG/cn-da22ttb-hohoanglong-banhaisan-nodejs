@@ -3,6 +3,22 @@ import { Link } from 'react-router-dom';
 import '../styles/storefront.css';
 import productController from '../controllers/productController';
 import ProductCard from '../components/ProductCard';
+import TrustAssuranceBar from '../components/TrustAssuranceBar';
+
+// Danh sách danh mục với icon
+const CATEGORY_LIST = [
+  { id: 'bestseller', name: 'Bán Chạy Nhất', icon: '🔥' },
+  { id: 'imported', name: 'Sản Phẩm Nhập Khẩu / Nội Địa', icon: '🌍' },
+  { id: 'shrimp', name: 'Tôm', icon: '🦐' },
+  { id: 'crab', name: 'Cua – Ghẹ', icon: '🦀' },
+  { id: 'fish', name: 'Cá', icon: '🐟' },
+  { id: 'shellfish', name: 'Nghêu – Sò – Ốc', icon: '🐚' },
+  { id: 'abalone', name: 'Bào Ngư – Hàu', icon: '🦪' },
+  { id: 'mussel', name: 'Vẹm – Bạch Tuộc', icon: '🐙' },
+  { id: 'frozen', name: 'Hải Sản Đông Lạnh', icon: '❄️' },
+  { id: 'sashimi', name: 'Sashimi', icon: '🍣' },
+  { id: 'processed', name: 'Menu Chế Biến', icon: '🍽️' },
+];
 
 const StorefrontPage = () => {
   const [catalog, setCatalog] = useState([]);
@@ -49,101 +65,126 @@ const StorefrontPage = () => {
   const spotlight = filteredProducts.length > 1 ? filteredProducts.slice(1, 4) : [];
 
   return (
-    <div className="storefront">
-      <section className="hero">
-        <div>
-          <p className="eyebrow">Hải sản chuẩn xuất khẩu</p>
-          <h1>Giao trong 3 giờ tại TP.HCM</h1>
-          <p className="hero-copy">
-            Các loại tôm hùm, cua hoàng đế, cá hồi Na Uy được bảo quản chuẩn lạnh sâu, đóng gói và giao tận nơi.
-          </p>
-          <div className="hero-actions">
-            <a href="#catalog" className="primary-btn">Khám phá menu</a>
-            <Link to="/auth" className="ghost-btn">Đặt lịch nhận hàng</Link>
+    <div className="storefront-new">
+      {/* Thanh cam kết dịch vụ */}
+      <TrustAssuranceBar />
+
+      {/* Layout 2 cột: Sidebar + Main Content */}
+      <div className="storefront-layout">
+        {/* Sidebar Danh mục */}
+        <aside className="category-sidebar">
+          <div className="sidebar-header">
+            <h2>DANH MỤC</h2>
           </div>
-          <ul className="hero-highlights">
-            <li>40+ mặt hàng tươi sống</li>
-            <li>Hỗ trợ làm sạch, sơ chế</li>
-            <li>Đối tác resort 5*</li>
-          </ul>
-        </div>
-
-        <div className="hero-feature">
-          {heroProduct ? (
-            <>
-              <p>Sản phẩm nổi bật</p>
-              <h2>{heroProduct.name}</h2>
-              <p className="price">{heroProduct.displayPrice}</p>
-              <p className="description">{heroProduct.description}</p>
-              <Link to={`/product/${heroProduct.id}`} className="ghost-btn">
-                Xem chi tiết
-              </Link>
-            </>
-          ) : (
-            <p>Đang tải dữ liệu...</p>
-          )}
-        </div>
-      </section>
-
-      <section className="spotlight" aria-label="Sản phẩm nổi bật">
-        {spotlight.map((item) => (
-          <article key={item.id}>
-            <p>{item.category_name}</p>
-            <h3>{item.name}</h3>
-            <p>{item.description}</p>
-            <span>{item.displayPrice}</span>
-          </article>
-        ))}
-      </section>
-
-      <section id="catalog" className="catalog">
-        <header>
-          <div>
-            <p className="eyebrow">Danh mục hôm nay</p>
-            <h2>Chọn loại hải sản bạn yêu thích</h2>
-          </div>
-          <div className="filter-bar">
-            <input
-              type="search"
-              placeholder="Tìm kiếm theo tên..."
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </div>
-        </header>
-
-        <div className="category-tabs">
-          <button
-            type="button"
-            className={selectedCategory === 'all' ? 'active' : ''}
-            onClick={() => setSelectedCategory('all')}
-          >
-            Tất cả
-          </button>
-          {categories.map((category) => (
+          <nav className="category-nav">
             <button
-              key={category.id}
-              type="button"
-              className={selectedCategory === String(category.id) ? 'active' : ''}
-              onClick={() => setSelectedCategory(String(category.id))}
+              className={`category-item ${selectedCategory === 'all' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('all')}
             >
-              {category.name}
+              <span className="category-icon">⭐</span>
+              <span>Tất cả</span>
             </button>
-          ))}
-        </div>
+            {CATEGORY_LIST.map((cat) => (
+              <button
+                key={cat.id}
+                className={`category-item ${selectedCategory === cat.id ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(cat.id)}
+              >
+                <span className="category-icon">{cat.icon}</span>
+                <span>{cat.name}</span>
+              </button>
+            ))}
+            {/* Map categories từ API */}
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                className={`category-item ${selectedCategory === String(category.id) ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(String(category.id))}
+              >
+                <span className="category-icon">🦞</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-        {loading && <p>Đang tải sản phẩm...</p>}
-        {error && <p className="error-text">{error}</p>}
+        {/* Main Content */}
+        <main className="storefront-main">
+          {/* Banner Hero Section */}
+          <section className="hero-banner-section">
+            <div className="hero-main-banner">
+              <div className="hero-image-placeholder">
+                <div className="hero-text-overlay">
+                  <h1>SLAY Vị ngon!</h1>
+                  <p>Cua hấp tươi ngon</p>
+                </div>
+              </div>
+            </div>
+            <div className="hero-side-banners">
+              <div className="side-banner king-crab">
+                <h3>King Crab</h3>
+                <p className="hotline">Hotline: 1900 6868</p>
+              </div>
+              <div className="side-banner abalone-kr">
+                <h3>Bào Ngư Hàn Quốc</h3>
+                <p className="price">2.500.000đ</p>
+                <Link to="/product/1" className="buy-btn">MUA NGAY</Link>
+              </div>
+              <div className="side-banner lobster">
+                <h3>Tôm Hùm Bông</h3>
+                <p className="price">1.800.000đ</p>
+                <Link to="/product/2" className="buy-btn">MUA NGAY</Link>
+              </div>
+            </div>
+          </section>
 
-        <div className="product-grid">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
+          {/* Banner phụ */}
+          <section className="secondary-banners">
+            <div className="secondary-banner">
+              <div className="banner-content">
+                <h2>Cá Mú Trân Châu</h2>
+                <p>Thượng hạng</p>
+              </div>
+            </div>
+            <div className="secondary-banner">
+              <div className="banner-content">
+                <h2>Bào Ngư Úc</h2>
+                <p>Tinh túy Australia</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Danh sách sản phẩm */}
+          <section className="products-section">
+            <div className="products-header">
+              <h2>Sản phẩm nổi bật</h2>
+              <div className="search-bar">
+                <input
+                  type="search"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+              </div>
+            </div>
+
+            {loading && <p className="loading-text">Đang tải sản phẩm...</p>}
+            {error && <p className="error-text">{error}</p>}
+
+            <div className="product-grid">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {!loading && !error && filteredProducts.length === 0 && (
+              <p className="empty-text">Không tìm thấy sản phẩm nào.</p>
+            )}
+          </section>
+        </main>
+      </div>
     </div>
   );
 };
 
 export default StorefrontPage;
-

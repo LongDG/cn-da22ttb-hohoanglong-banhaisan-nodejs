@@ -15,7 +15,7 @@ const AdminLayout = () => {
   };
 
   const menuItems = [
-    { path: '/admin', label: 'Dashboard', icon: '📊' },
+    { path: '/admin', label: 'Tổng quan', icon: '📊' },
     { path: '/admin/products', label: 'Sản phẩm', icon: '🦐' },
     { path: '/admin/orders', label: 'Đơn hàng', icon: '📦' },
     { path: '/admin/carts', label: 'Giỏ hàng', icon: '🛒' },
@@ -24,6 +24,8 @@ const AdminLayout = () => {
     { path: '/admin/vouchers', label: 'Voucher', icon: '🎫' },
     { path: '/admin/suppliers', label: 'Nhà cung cấp', icon: '🏭' },
     { path: '/admin/payments', label: 'Thanh toán', icon: '💳' },
+    { path: '/admin/shipping', label: 'Phí Ship', icon: '🚚' },
+    { path: '/admin/settings', label: 'Cấu hình', icon: '⚙️' },
   ];
 
   const isActive = (path) => {

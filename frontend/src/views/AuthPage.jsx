@@ -17,6 +17,32 @@ const AuthPage = () => {
     setModeState(queryMode);
   }, [queryMode]);
 
+  // Kiểm tra nếu đã đăng nhập thì redirect
+  useEffect(() => {
+    const token = localStorage.getItem('seafresh_token');
+    const userStr = localStorage.getItem('seafresh_user');
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const isAdmin = user?.role === 'admin';
+        
+        if (isAdmin) {
+          // Admin đã đăng nhập, redirect đến Admin Dashboard
+          navigate('/admin', { replace: true });
+        } else {
+          // Customer đã đăng nhập, redirect đến Customer Portal
+          navigate('/customer', { replace: true });
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        // Nếu lỗi parse, xóa token và user để đăng nhập lại
+        localStorage.removeItem('seafresh_token');
+        localStorage.removeItem('seafresh_user');
+      }
+    }
+  }, [navigate]);
+
   const updateMode = (nextMode) => {
     setModeState(nextMode);
     if (nextMode === 'login') {
@@ -47,10 +73,50 @@ const AuthPage = () => {
       setStatus({ type: 'success', message: result.message });
 
       if (mode === 'login' && result?.token) {
-        localStorage.setItem('seafresh_token', result.token);
-        localStorage.setItem('seafresh_user', JSON.stringify(result.user || {}));
+        console.log('[AUTH PAGE] ============ LOGIN FLOW START ============');
+        console.log('[AUTH PAGE] Result object:', JSON.stringify(result, null, 2));
+        console.log('[AUTH PAGE] Result.token type:', typeof result.token);
+        console.log('[AUTH PAGE] Result.token value:', result.token ? result.token.substring(0, 50) + '...' : 'UNDEFINED');
+        
+        // Lưu token và user info
+        try {
+          localStorage.setItem('seafresh_token', result.token);
+          localStorage.setItem('seafresh_user', JSON.stringify(result.user || {}));
+          console.log('[AUTH PAGE] ✓ Saved to localStorage successfully');
+        } catch (e) {
+          console.error('[AUTH PAGE] ❌ Error saving to localStorage:', e);
+        }
 
-        // Sync localStorage cart to database after login
+        // Verify saved data
+        const savedToken = localStorage.getItem('seafresh_token');
+        const savedUserStr = localStorage.getItem('seafresh_user');
+        console.log('[AUTH PAGE] After save - Token:', !!savedToken ? 'EXISTS (' + savedToken.length + ' chars)' : 'EMPTY');
+        console.log('[AUTH PAGE] After save - User:', !!savedUserStr ? 'EXISTS' : 'EMPTY');
+        
+        const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+        console.log('[AUTH PAGE] Parsed user:', savedUser);
+        
+        // Kiểm tra role một cách chi tiết
+        const user = result.user;
+        const roleRaw = user?.role;
+        const userRole = (roleRaw || '').toLowerCase().trim();
+        const isAdmin = userRole === 'admin';
+        
+        console.log('[AUTH PAGE] Role analysis:');
+        console.log('  - user:', user);
+        console.log('  - roleRaw:', roleRaw, '(type: ' + typeof roleRaw + ')');
+        console.log('  - userRole:', userRole);
+        console.log('  - isAdmin:', isAdmin);
+        console.log('[AUTH PAGE] ============ LOGIN FLOW END ============');
+
+        // Redirect admin ngay lập tức đến Admin Dashboard
+        if (isAdmin) {
+          console.log('[AUTH PAGE] ✅ ADMIN DETECTED - navigating to /admin');
+          navigate('/admin', { replace: true });
+          return;
+        }
+
+        // Sync localStorage cart to database after login (chỉ cho customer)
         try {
           await syncLocalCartToDatabase();
         } catch (error) {
@@ -58,8 +124,9 @@ const AuthPage = () => {
           // Don't block login if cart sync fails
         }
 
-        const role = result.user?.role === 'admin' ? 'admin' : 'customer';
-        navigate(role === 'admin' ? '/admin' : '/customer', { replace: true });
+        // Redirect customer đến Customer Portal
+        console.log('[AUTH PAGE] ✅ REDIRECTING TO /customer');
+        navigate('/customer', { replace: true });
         return;
       }
 

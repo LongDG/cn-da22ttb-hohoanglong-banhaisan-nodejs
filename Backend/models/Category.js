@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // Category Schema
 const categorySchema = new mongoose.Schema({
   category_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema({
     trim: true
   },
   parent_id: {
-    type: Number,
+    type: String,
     default: null,
     ref: 'Category'
   }

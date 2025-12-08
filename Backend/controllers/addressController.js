@@ -7,7 +7,7 @@ exports.getAllAddresses = async (req, res) => {
     let query = {};
     
     if (userId) {
-      query.user_id = parseInt(userId);
+      query.user_id = userId;
     }
     
     const addresses = await Address.find(query).sort({ address_id: 1 });
@@ -27,7 +27,7 @@ exports.getAllAddresses = async (req, res) => {
 exports.getAddressById = async (req, res) => {
   try {
     const { id } = req.params;
-    const address = await Address.findOne({ address_id: parseInt(id) });
+    const address = await Address.findOne({ address_id: id });
     
     if (!address) {
       return res.status(404).json({
@@ -65,26 +65,35 @@ exports.createAddress = async (req, res) => {
     // nếu cài đặt này là mặc định, hãy bỏ cài đặt khác cho cùng một người dùng
     if (is_default) {
       await Address.updateMany(
-        { user_id: parseInt(finalUserId) },
+        { user_id: finalUserId },
         { is_default: false }
       );
     }
     
     let finalAddressId;
     if (address_id !== undefined && address_id !== null && address_id !== '') {
-      const provided = parseInt(address_id);
-      if (isNaN(provided)) return res.status(400).json({ success: false, error: 'address_id phải là số' });
-      const exists = await Address.findOne({ address_id: provided });
+      const exists = await Address.findOne({ address_id: address_id });
       if (exists) return res.status(400).json({ success: false, error: 'address_id đã tồn tại' });
-      finalAddressId = provided;
+      finalAddressId = address_id;
     } else {
+      // Auto-generate address_id
       const lastAddress = await Address.findOne().sort({ address_id: -1 });
-      finalAddressId = lastAddress ? lastAddress.address_id + 1 : 1;
+      if (lastAddress && lastAddress.address_id) {
+        const lastId = lastAddress.address_id;
+        if (typeof lastId === 'string' && lastId.startsWith('A')) {
+          const num = parseInt(lastId.substring(1));
+          finalAddressId = 'A' + (num + 1);
+        } else {
+          finalAddressId = 'A001';
+        }
+      } else {
+        finalAddressId = 'A001';
+      }
     }
 
     const address = await Address.create({
       address_id: finalAddressId,
-      user_id: parseInt(finalUserId),
+      user_id: finalUserId,
       recipient_name,
       phone_number,
       full_address,
@@ -107,17 +116,17 @@ exports.updateAddress = async (req, res) => {
     
     // nếu cài đặt này là mặc định, hãy bỏ cài đặt khác cho cùng một người dùng
     if (is_default) {
-      const address = await Address.findOne({ address_id: parseInt(id) });
+      const address = await Address.findOne({ address_id: id });
       if (address) {
         await Address.updateMany(
-          { user_id: address.user_id, address_id: { $ne: parseInt(id) } },
+          { user_id: address.user_id, address_id: { $ne: id } },
           { is_default: false }
         );
       }
     }
     
     const address = await Address.findOneAndUpdate(
-      { address_id: parseInt(id) },
+      { address_id: id },
       { recipient_name, phone_number, full_address, is_default },
       { new: true, runValidators: true }
     );
@@ -145,7 +154,7 @@ exports.updateAddress = async (req, res) => {
 exports.deleteAddress = async (req, res) => {
   try {
     const { id } = req.params;
-    const address = await Address.findOneAndDelete({ address_id: parseInt(id) });
+    const address = await Address.findOneAndDelete({ address_id: id });
     
     if (!address) {
       return res.status(404).json({

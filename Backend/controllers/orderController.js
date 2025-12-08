@@ -1,6 +1,8 @@
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 const ProductVariant = require('../models/ProductVariant');
+const Payment = require('../models/Payment');
+const { calculateShippingFee } = require('../utils/shippingFee');
 const mongoose = require('mongoose');
 
 exports.getAllOrders = async (req, res) => {
@@ -69,7 +71,16 @@ exports.createOrder = async (req, res) => {
   session.startTransaction();
   
   try {
-    const { order_id, shipping_address, shipping_fee, discount_amount, notes, items } = req.body;
+    const { 
+      order_id, 
+      shipping_address, 
+      shipping_fee, 
+      discount_amount, 
+      notes, 
+      items,
+      payment_method = 'COD',
+      distance_km
+    } = req.body;
     
     // Use authenticated user's ID
     const user_id = req.user.user_id;
@@ -83,8 +94,8 @@ exports.createOrder = async (req, res) => {
       });
     }
     
-    // Validate và calculate total amount
-    let totalAmount = shipping_fee || 0;
+    // Validate và calculate total amount (chưa bao gồm phí ship)
+    let subtotalAmount = 0;
     const variantUpdates = [];
     
     for (const item of items) {
@@ -108,7 +119,7 @@ exports.createOrder = async (req, res) => {
       }
       
       const price = variant.sale_price || variant.price;
-      totalAmount += price * item.quantity;
+      subtotalAmount += price * item.quantity;
       
       variantUpdates.push({
         variant_id: parseInt(item.variant_id),
@@ -117,7 +128,21 @@ exports.createOrder = async (req, res) => {
       });
     }
     
-    totalAmount -= discount_amount || 0;
+    // Áp dụng giảm giá
+    subtotalAmount -= discount_amount || 0;
+    
+    // Tính phí ship tự động nếu không được cung cấp
+    let finalShippingFee = shipping_fee;
+    if (finalShippingFee === undefined || finalShippingFee === null) {
+      finalShippingFee = calculateShippingFee(
+        distance_km || 0,
+        subtotalAmount,
+        shipping_address
+      );
+    }
+    
+    // Tổng tiền cuối cùng = subtotal + phí ship
+    const totalAmount = subtotalAmount + finalShippingFee;
     
     // Determine order_id (accept provided or auto-generate)
     let finalOrderId;
@@ -140,16 +165,23 @@ exports.createOrder = async (req, res) => {
       finalOrderId = lastOrder ? lastOrder.order_id + 1 : 1001;
     }
     
-    // Create order với status tiếng Anh
+    // Xác định trạng thái ban đầu cho đơn COD
+    const initialStatus = payment_method === 'COD' ? 'Chờ xác nhận' : 'pending';
+    const initialPaymentStatus = payment_method === 'COD' ? 'Chưa thanh toán' : 'pending';
+    
+    // Create order với status và payment_status phù hợp
     const order = await Order.create([{
       order_id: finalOrderId,
       user_id: parseInt(user_id),
       shipping_address,
-      shipping_fee: shipping_fee || 0,
+      shipping_fee: finalShippingFee,
       discount_amount: discount_amount || 0,
       total_amount: totalAmount,
       notes: notes || null,
-      status: 'pending'
+      status: initialStatus,
+      payment_status: initialPaymentStatus,
+      payment_method: payment_method || 'COD',
+      distance_km: distance_km || null
     }], { session });
     
     // Create order items and update stock
@@ -199,6 +231,21 @@ exports.createOrder = async (req, res) => {
       orderItems.push(orderItem[0]);
     }
     
+    // Tạo Payment record cho đơn COD
+    if (payment_method === 'COD') {
+      const lastPayment = await Payment.findOne().sort({ payment_id: -1 }).session(session);
+      const nextPaymentId = lastPayment ? lastPayment.payment_id + 1 : 1;
+      
+      await Payment.create([{
+        payment_id: nextPaymentId,
+        order_id: finalOrderId,
+        amount: totalAmount,
+        payment_method: 'COD',
+        status: 'pending',
+        payment_status: 'Chưa thanh toán'
+      }], { session });
+    }
+    
     // Commit transaction
     await session.commitTransaction();
     session.endSession();
@@ -224,11 +271,26 @@ exports.createOrder = async (req, res) => {
 exports.updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, shipping_address, notes } = req.body;
+    const { status, shipping_address, notes, payment_status } = req.body;
+    
+    // Validate status
+    const validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled', 'Chờ xác nhận', 'Chờ giao', 'Hoàn tất'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: `Trạng thái không hợp lệ. Các trạng thái hợp lệ: ${validStatuses.join(', ')}`
+      });
+    }
+    
+    const updateData = {};
+    if (status !== undefined) updateData.status = status;
+    if (shipping_address !== undefined) updateData.shipping_address = shipping_address;
+    if (notes !== undefined) updateData.notes = notes;
+    if (payment_status !== undefined) updateData.payment_status = payment_status;
     
     const order = await Order.findOneAndUpdate(
       { order_id: parseInt(id) },
-      { status, shipping_address, notes },
+      updateData,
       { new: true, runValidators: true }
     );
     
@@ -239,10 +301,87 @@ exports.updateOrder = async (req, res) => {
       });
     }
     
+    // Nếu cập nhật payment_status, cũng cập nhật Payment record
+    if (payment_status) {
+      await Payment.findOneAndUpdate(
+        { order_id: parseInt(id) },
+        { 
+          payment_status: payment_status,
+          status: payment_status === 'Đã thanh toán' ? 'successful' : 'pending'
+        },
+        { new: true }
+      );
+    }
+    
+    // Ghi log thay đổi trạng thái
+    console.log(`[ORDER STATUS UPDATE] Order #${order.order_id}: ${status || 'no change'}, Payment: ${payment_status || 'no change'}`);
+    
     res.json({
       success: true,
       data: order,
-      message: 'Cập nhật đơn hàng thành công'
+      message: `Cập nhật đơn hàng thành công. Trạng thái: ${order.status}`
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Cập nhật trạng thái thanh toán COD khi giao hàng xong
+ * Khi nhân viên giao hàng thu tiền xong, gọi API này để:
+ * - payment_status = "Đã thanh toán"
+ * - order_status = "Hoàn tất"
+ */
+exports.completeCODOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const order = await Order.findOne({ order_id: parseInt(id) });
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Không tìm thấy đơn hàng'
+      });
+    }
+    
+    // Chỉ áp dụng cho đơn COD
+    if (order.payment_method !== 'COD') {
+      return res.status(400).json({
+        success: false,
+        error: 'Chỉ có thể hoàn tất đơn hàng COD bằng API này'
+      });
+    }
+    
+    // Cập nhật Order
+    const updatedOrder = await Order.findOneAndUpdate(
+      { order_id: parseInt(id) },
+      {
+        payment_status: 'Đã thanh toán',
+        status: 'Hoàn tất'
+      },
+      { new: true, runValidators: true }
+    );
+    
+    // Cập nhật Payment
+    await Payment.findOneAndUpdate(
+      { order_id: parseInt(id) },
+      {
+        payment_status: 'Đã thanh toán',
+        status: 'successful'
+      },
+      { new: true }
+    );
+    
+    console.log(`[COD ORDER COMPLETED] Order #${order.order_id} - Payment received`);
+    
+    res.json({
+      success: true,
+      data: updatedOrder,
+      message: 'Đơn hàng COD đã được hoàn tất. Thanh toán đã được xác nhận.'
     });
   } catch (error) {
     res.status(500).json({

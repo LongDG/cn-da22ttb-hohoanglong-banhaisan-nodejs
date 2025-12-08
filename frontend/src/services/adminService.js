@@ -59,3 +59,8 @@ export const deletePayment = (id) => apiClient.delete(`/api/payments/${id}`);
 export const getAllCarts = () => apiClient.get('/api/carts/admin/all');
 export const getCartByUserId = (userId) => apiClient.get(`/api/carts/admin/user/${userId}`);
 
+// Shipping
+export const calculateShippingFee = (data) => apiClient.post('/api/shipping/calculate', data);
+export const getShippingRules = () => apiClient.get('/api/shipping/rules');
+export const completeCODOrder = (id) => apiClient.put(`/api/orders/${id}/complete-cod`);
+

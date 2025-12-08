@@ -10,11 +10,11 @@ exports.getAllProducts = async (req, res) => {
     let query = {};
     
     if (categoryId) {
-      query.category_id = parseInt(categoryId);
+      query.category_id = categoryId;
     }
     
     if (supplierId) {
-      query.supplier_id = parseInt(supplierId);
+      query.supplier_id = supplierId;
     }
     
     if (status) {
@@ -38,7 +38,7 @@ exports.getAllProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findOne({ product_id: parseInt(id) });
+    const product = await Product.findOne({ product_id: id });
     
     if (!product) {
       return res.status(404).json({
@@ -71,7 +71,7 @@ exports.createProduct = async (req, res) => {
     }
 
     // Validate category exists
-    const category = await Category.findOne({ category_id: parseInt(category_id) });
+    const category = await Category.findOne({ category_id: category_id });
     if (!category) {
       return res.status(400).json({
         success: false,
@@ -80,7 +80,7 @@ exports.createProduct = async (req, res) => {
     }
 
     // Validate supplier exists
-    const supplier = await Supplier.findOne({ supplier_id: parseInt(supplier_id) });
+    const supplier = await Supplier.findOne({ supplier_id: supplier_id });
     if (!supplier) {
       return res.status(400).json({
         success: false,
@@ -91,23 +91,28 @@ exports.createProduct = async (req, res) => {
     let finalProductId;
 
     if (product_id !== undefined && product_id !== null && product_id !== '') {
-      // accept provided product_id (from input) and validate
-      const providedId = parseInt(product_id);
-      if (isNaN(providedId)) {
-        return res.status(400).json({ success: false, error: 'product_id must be a number' });
-      }
-
       // check duplicate
-      const existing = await Product.findOne({ product_id: providedId });
+      const existing = await Product.findOne({ product_id: product_id });
       if (existing) {
         return res.status(400).json({ success: false, error: 'product_id already exists' });
       }
 
-      finalProductId = providedId;
+      finalProductId = product_id;
     } else {
-      // Get the next product_id
+      // Auto-generate product_id
       const lastProduct = await Product.findOne().sort({ product_id: -1 });
-      finalProductId = lastProduct ? lastProduct.product_id + 1 : 1;
+      // Generate next ID based on last one
+      if (lastProduct && lastProduct.product_id) {
+        const lastId = lastProduct.product_id;
+        if (typeof lastId === 'string' && lastId.startsWith('P')) {
+          const num = parseInt(lastId.substring(1));
+          finalProductId = 'P' + (num + 1);
+        } else {
+          finalProductId = 'P1001';
+        }
+      } else {
+        finalProductId = 'P1001';
+      }
     }
 
     const product = await Product.create({
@@ -115,8 +120,8 @@ exports.createProduct = async (req, res) => {
       name,
       description,
       image_url,
-      category_id: parseInt(category_id),
-      supplier_id: parseInt(supplier_id),
+      category_id: category_id,
+      supplier_id: supplier_id,
       status: status || 'active'
     });
 
@@ -140,7 +145,7 @@ exports.updateProduct = async (req, res) => {
     
     // Validate category if provided
     if (category_id !== undefined) {
-      const category = await Category.findOne({ category_id: parseInt(category_id) });
+      const category = await Category.findOne({ category_id: category_id });
       if (!category) {
         return res.status(400).json({
           success: false,
@@ -151,7 +156,7 @@ exports.updateProduct = async (req, res) => {
     
     // Validate supplier if provided
     if (supplier_id !== undefined) {
-      const supplier = await Supplier.findOne({ supplier_id: parseInt(supplier_id) });
+      const supplier = await Supplier.findOne({ supplier_id: supplier_id });
       if (!supplier) {
         return res.status(400).json({
           success: false,
@@ -164,12 +169,12 @@ exports.updateProduct = async (req, res) => {
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
     if (image_url !== undefined) updateData.image_url = image_url;
-    if (category_id !== undefined) updateData.category_id = parseInt(category_id);
-    if (supplier_id !== undefined) updateData.supplier_id = parseInt(supplier_id);
+    if (category_id !== undefined) updateData.category_id = category_id;
+    if (supplier_id !== undefined) updateData.supplier_id = supplier_id;
     if (status !== undefined) updateData.status = status;
     
     const product = await Product.findOneAndUpdate(
-      { product_id: parseInt(id) },
+      { product_id: id },
       updateData,
       { new: true, runValidators: true }
     );
@@ -197,10 +202,9 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const productId = parseInt(id);
     
     // Check if product exists
-    const product = await Product.findOne({ product_id: productId });
+    const product = await Product.findOne({ product_id: id });
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -209,7 +213,7 @@ exports.deleteProduct = async (req, res) => {
     }
     
     // Check if product has variants
-    const variants = await ProductVariant.find({ product_id: productId });
+    const variants = await ProductVariant.find({ product_id: id });
     if (variants.length > 0) {
       // Check if any variant is in order items
       const variantIds = variants.map(v => v.variant_id);
@@ -229,7 +233,7 @@ exports.deleteProduct = async (req, res) => {
     }
     
     // Safe to delete
-    await Product.findOneAndDelete({ product_id: productId });
+    await Product.findOneAndDelete({ product_id: id });
     
     res.json({
       success: true,

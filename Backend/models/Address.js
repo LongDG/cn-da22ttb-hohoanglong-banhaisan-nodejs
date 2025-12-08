@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 // Address Schema lược đồ địa chỉ
 const addressSchema = new mongoose.Schema({
   address_id: {
-    type: Number,
+    type: String,
     unique: true,
     required: true
   },
   user_id: {
-    type: Number,
+    type: String,
     required: true,
     ref: 'User'
   },

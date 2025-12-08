@@ -3,6 +3,7 @@ import './App.css';
 import AuthPage from './views/AuthPage';
 import StorefrontPage from './views/StorefrontPage';
 import ProductDetailPage from './views/ProductDetailPage';
+import PolicyPage from './views/PolicyPage';
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './views/admin/AdminDashboard';
@@ -14,6 +15,8 @@ import VouchersPage from './views/admin/VouchersPage';
 import SuppliersPage from './views/admin/SuppliersPage';
 import PaymentsPage from './views/admin/PaymentsPage';
 import CartsPage from './views/admin/CartsPage';
+import ShippingPage from './views/admin/ShippingPage';
+import SettingsPage from './views/admin/SettingsPage';
 import CustomerLayout from './layouts/CustomerLayout';
 import CustomerPortal from './views/CustomerPortal';
 import CartPage from './views/CartPage';
@@ -44,6 +47,8 @@ function App() {
           <Route path="suppliers" element={<SuppliersPage />} />
           <Route path="payments" element={<PaymentsPage />} />
           <Route path="carts" element={<CartsPage />} />
+          <Route path="shipping" element={<ShippingPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         <Route
@@ -63,6 +68,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<StorefrontPage />} />
           <Route path="/product/:productId" element={<ProductDetailPage />} />
+          <Route path="/policy" element={<PolicyPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

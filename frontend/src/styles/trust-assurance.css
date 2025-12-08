@@ -1,0 +1,110 @@
+/* Trust Assurance Bar Styling */
+
+.trust-assurance-bar {
+  background: linear-gradient(135deg, #003366 0%, #004080 100%);
+  padding: 24px 16px;
+  margin: 20px 0;
+  border-radius: 12px;
+}
+
+.trust-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.commitment-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  text-decoration: none;
+  color: #cbd5f5;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.commitment-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 51, 102, 0.3);
+}
+
+.commitment-icon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.commitment-text {
+  flex: 1;
+}
+
+.commitment-label {
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0;
+  color: #fff;
+}
+
+.commitment-desc {
+  font-size: 12px;
+  margin: 4px 0 0 0;
+  opacity: 0.85;
+  color: #cbd5f5;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .trust-assurance-bar {
+    padding: 16px 12px;
+    margin: 12px 0;
+  }
+
+  .trust-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .commitment-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .commitment-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 28px;
+  }
+
+  .commitment-label {
+    font-size: 13px;
+  }
+
+  .commitment-desc {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trust-container {
+    grid-template-columns: 1fr;
+  }
+
+  .commitment-item {
+    flex-direction: row;
+    text-align: left;
+  }
+}
