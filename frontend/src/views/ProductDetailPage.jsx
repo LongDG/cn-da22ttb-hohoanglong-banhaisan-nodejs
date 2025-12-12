@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import '../styles/storefront.css';
 import productController from '../controllers/productController';
-import { createOrder } from '../services/orderService';
 import { addItemToCart } from '../services/cartService';
 import AddToCartFeedback from '../components/AddToCartFeedback';
 
@@ -50,17 +49,25 @@ const ProductDetailPage = () => {
   }, [product, selectedVariant]);
 
   const handleAddToCart = async () => {
+    console.log('[ADD TO CART] Button clicked!');
+    console.log('[ADD TO CART] isLoggedIn:', isLoggedIn);
+    console.log('[ADD TO CART] selectedVariant:', selectedVariant);
+    console.log('[ADD TO CART] quantity:', quantity);
+    
     if (!isLoggedIn) {
+      console.log('[ADD TO CART] Redirecting to login...');
       navigate('/auth?mode=login');
       return;
     }
 
     if (!selectedVariant) {
+      console.log('[ADD TO CART] No variant selected');
       setError('Vui lòng chọn biến thể sản phẩm');
       return;
     }
 
     if (quantity < 1 || quantity > selectedVariant.stock_quantity) {
+      console.log('[ADD TO CART] Invalid quantity');
       setError(`Số lượng không hợp lệ. Tồn kho: ${selectedVariant.stock_quantity}`);
       return;
     }
@@ -69,9 +76,12 @@ const ProductDetailPage = () => {
     setError(null);
 
     try {
+      console.log('[ADD TO CART] Calling API with:', { variant_id: selectedVariant.variant_id, quantity });
       await addItemToCart(selectedVariant.variant_id, quantity);
+      console.log('[ADD TO CART] Success!');
       setShowFeedback(true);
     } catch (err) {
+      console.error('[ADD TO CART] Error:', err);
       setError(err.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
     } finally {
       setIsAddingToCart(false);
@@ -79,17 +89,25 @@ const ProductDetailPage = () => {
   };
 
   const handleOrder = async () => {
+    console.log('[BUY NOW] Button clicked!');
+    console.log('[BUY NOW] isLoggedIn:', isLoggedIn);
+    console.log('[BUY NOW] selectedVariant:', selectedVariant);
+    console.log('[BUY NOW] quantity:', quantity);
+    
     if (!isLoggedIn) {
+      console.log('[BUY NOW] Redirecting to login...');
       navigate('/auth?mode=login');
       return;
     }
 
     if (!selectedVariant) {
+      console.log('[BUY NOW] No variant selected');
       setError('Vui lòng chọn biến thể sản phẩm');
       return;
     }
 
     if (quantity < 1 || quantity > selectedVariant.stock_quantity) {
+      console.log('[BUY NOW] Invalid quantity');
       setError(`Số lượng không hợp lệ. Tồn kho: ${selectedVariant.stock_quantity}`);
       return;
     }
@@ -98,27 +116,17 @@ const ProductDetailPage = () => {
     setError(null);
 
     try {
-      // Prompt for shipping address (simplified - in production, use a form)
-      const shippingAddress = prompt('Nhập địa chỉ giao hàng:');
-      if (!shippingAddress) {
-        setIsOrdering(false);
-        return;
-      }
-
-      const orderData = {
-        shipping_address: shippingAddress,
-        shipping_fee: 30000, // Default shipping fee
-        items: [{
-          variant_id: selectedVariant.variant_id,
-          quantity: quantity
-        }]
-      };
-
-      const result = await createOrder(orderData);
-      alert('Đặt hàng thành công! Mã đơn hàng: ' + result.data.order_id);
-      navigate('/customer/orders');
+      // Step 1: Automatically add to cart
+      console.log('[BUY NOW] Adding to cart first...');
+      await addItemToCart(selectedVariant.variant_id, quantity);
+      console.log('[BUY NOW] Added to cart successfully!');
+      
+      // Step 2: Redirect to cart page with checkout=true flag
+      console.log('[BUY NOW] Redirecting to checkout...');
+      navigate('/cart?checkout=true');
     } catch (err) {
-      setError(err.message || 'Có lỗi xảy ra khi đặt hàng');
+      console.error('[BUY NOW] Error:', err);
+      setError(err.message || 'Có lỗi xảy ra khi xử lý đơn hàng');
     } finally {
       setIsOrdering(false);
     }
@@ -240,7 +248,7 @@ const ProductDetailPage = () => {
         <AddToCartFeedback
           show={showFeedback}
           onClose={() => setShowFeedback(false)}
-          onGoToCart={() => { setShowFeedback(false); navigate('/customer/cart'); }}
+          onGoToCart={() => { setShowFeedback(false); navigate('/cart'); }}
         />
       </div>
     </section>

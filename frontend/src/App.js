@@ -68,6 +68,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<StorefrontPage />} />
           <Route path="/product/:productId" element={<ProductDetailPage />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/policy" element={<PolicyPage />} />
         </Route>
       </Routes>

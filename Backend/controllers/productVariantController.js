@@ -3,10 +3,13 @@ const ProductVariant = require('../models/ProductVariant');
 exports.getAllProductVariants = async (req, res) => {
   try {
     const { productId } = req.query;
+    console.log('Query params:', req.query); // Debug
+    console.log('productId received:', productId); // Debug
     let query = {};
     
     if (productId) {
-      query.product_id = parseInt(productId);
+      query.product_id = productId; // Use String ID directly
+      console.log('Query filter:', query); // Debug
     }
     
     const variants = await ProductVariant.find(query).sort({ variant_id: 1 });
@@ -26,7 +29,7 @@ exports.getAllProductVariants = async (req, res) => {
 exports.getProductVariantById = async (req, res) => {
   try {
     const { id } = req.params;
-    const variant = await ProductVariant.findOne({ variant_id: parseInt(id) });
+    const variant = await ProductVariant.findOne({ variant_id: id }); // Use String ID directly
     
     if (!variant) {
       return res.status(404).json({
@@ -65,7 +68,7 @@ exports.createProductVariant = async (req, res) => {
       finalVariantId = lastVariant ? lastVariant.variant_id + 1 : 1;
     }
 
-    const variant = await ProductVariant.create({ variant_id: finalVariantId, product_id: parseInt(product_id), name, price: parseFloat(price), sale_price: sale_price ? parseFloat(sale_price) : null, stock_quantity: stock_quantity || 0 });
+    const variant = await ProductVariant.create({ variant_id: finalVariantId, product_id: product_id, name, price: parseFloat(price), sale_price: sale_price ? parseFloat(sale_price) : null, stock_quantity: stock_quantity || 0 });
     res.status(201).json({ success: true, data: variant, message: 'Đã tạo biến thể sản phẩm thành công' });
   } catch (error) {
     res.status(500).json({

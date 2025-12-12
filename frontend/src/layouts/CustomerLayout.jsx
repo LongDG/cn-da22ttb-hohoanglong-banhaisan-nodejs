@@ -23,7 +23,7 @@ const CustomerLayout = () => {
           <NavLink end to="/customer">
             Tổng quan
           </NavLink>
-          <NavLink to="/customer/cart">
+          <NavLink to="/cart">
             Giỏ hàng
           </NavLink>
           <NavLink to="/customer/orders">

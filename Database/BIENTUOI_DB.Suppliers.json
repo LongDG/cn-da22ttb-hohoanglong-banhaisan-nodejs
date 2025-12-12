@@ -2,7 +2,7 @@
   "_id": {
     "$oid": "6927f92cf5a9cecb4c6d2343"
   },
-  "supplier_id": 501,
+  "supplier_id": "S501",
   "name": "HTX Thủy Sản Năm Căn Cà Mau",
   "contact_info": "Ấp Xẻo Mắm, Xã Đất Mũi, Cà Mau - 02903.888.999"
 },
@@ -10,7 +10,7 @@
   "_id": {
     "$oid": "6927f937f5a9cecb4c6d2344"
   },
-  "supplier_id": 502,
+  "supplier_id": "S502",
   "name": "Công Ty Hải Sản Phan Thiết",
   "contact_info": "Cảng Cá Phan Thiết, Bình Thuận - 02523.777.888"
 },
@@ -18,7 +18,16 @@
   "_id": {
     "$oid": "6927f944f5a9cecb4c6d2345"
   },
-  "supplier_id": 503,
+  "supplier_id": "S503",
   "name": "Nhập Khẩu Hải Sản Quốc Tế",
   "contact_info": "Khu CN Tân Bình, TP.HCM - 0283.999.000"
+},
+{
+  "_id": {
+    "$oid": "693612982e735af8a9061c52"
+  },
+  "supplier_id": "S5031",
+  "name": "Hoàng Thành",
+  "contact_info": "0383277120",
+  "__v": 0
 }]

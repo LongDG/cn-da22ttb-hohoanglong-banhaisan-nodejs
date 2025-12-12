@@ -19,4 +19,19 @@
   "value": 30000,
   "expiry_date": "2025-06-30T23:59:59Z",
   "usage_limit": 1000
+},
+{
+  "_id": {
+    "$oid": "693612812e735af8a9061c4c"
+  },
+  "voucher_id": "21",
+  "code": "12T12",
+  "discount_type": "percentage",
+  "value": 50,
+  "expiry_date": {
+    "$date": "2025-12-28T00:00:00.000Z"
+  },
+  "usage_limit": 2,
+  "used_count": 0,
+  "__v": 0
 }]
