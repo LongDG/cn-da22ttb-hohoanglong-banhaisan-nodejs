@@ -7,6 +7,12 @@ const orderSchema = new mongoose.Schema({
     unique: true,
     required: true
   },
+  orderCode: {
+    type: String,
+    unique: true,
+    required: true,
+    index: true
+  },
   user_id: {
     type: String,
     required: true,
@@ -16,6 +22,12 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  orderStatus: {
+    type: String,
+    enum: ['Chờ duyệt', 'Đã duyệt', 'Đang vận chuyển', 'Đã giao', 'Hoàn thành', 'Hủy'],
+    default: 'Chờ duyệt'
+  },
+  // Keep old status field for backward compatibility
   status: {
     type: String,
     enum: ['pending', 'processing', 'shipped', 'completed', 'cancelled', 'Chờ xác nhận', 'Chờ giao', 'Hoàn tất'],
@@ -26,9 +38,16 @@ const orderSchema = new mongoose.Schema({
     enum: ['Chưa thanh toán', 'Đã thanh toán', 'pending', 'successful', 'failed'],
     default: 'Chưa thanh toán'
   },
+  paymentMethod: {
+    type: String,
+    enum: ['cod', 'banking'],
+    required: true,
+    default: 'cod'
+  },
+  // Keep old payment_method for backward compatibility
   payment_method: {
     type: String,
-    enum: ['COD', 'Momo', 'Bank Transfer', 'Credit Card'],
+    enum: ['COD', 'Momo', 'Bank Transfer', 'Credit Card', 'cod', 'banking'],
     default: 'COD'
   },
   distance_km: {

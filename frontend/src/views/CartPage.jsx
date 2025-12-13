@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   getCart, 
   updateCartItemByVariant, 
@@ -18,10 +18,23 @@ const CartPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     fetchCart();
   }, []);
+
+  // Auto-open checkout modal if ?checkout=true
+  useEffect(() => {
+    const shouldCheckout = searchParams.get('checkout');
+    if (shouldCheckout === 'true' && cart && cart.items && cart.items.length > 0) {
+      console.log('[CART PAGE] Auto-opening checkout modal from Buy Now flow');
+      setShowCheckout(true);
+      // Remove checkout param from URL
+      searchParams.delete('checkout');
+      setSearchParams(searchParams);
+    }
+  }, [cart, searchParams, setSearchParams]);
 
   const fetchCart = async () => {
     try {

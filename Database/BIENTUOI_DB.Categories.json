@@ -1,26 +1,49 @@
-{
-  "type": "Compass Connections",
-  "version": {
-    "$numberInt": "1"
+[{
+  "_id": {
+    "$oid": "6927f8a9f5a9cecb4c6d233c"
   },
-  "connections": [
-    {
-      "id": "278c2b7d-f457-4919-9ba4-0365ded156a0",
-      "lastUsed": {
-        "$date": {
-          "$numberLong": "1764476536128"
-        }
-      },
-      "favorite": {
-        "name": ""
-      },
-      "savedConnectionType": "recent",
-      "connectionOptions": {
-        "connectionString": "mongodb://localhost:27017/",
-        "oidc": {
-          "serializedState": "eyJvaWRjUGx1Z2luU3RhdGVWZXJzaW9uIjoxLCJzdGF0ZSI6W119"
-        }
-      }
-    }
-  ]
-}
+  "category_id": "CT001",
+  "name": "Cua - Ghẹ",
+  "parent_id": null
+},
+{
+  "_id": {
+    "$oid": "6927f8b7f5a9cecb4c6d233d"
+  },
+  "category_id": "CT002",
+  "name": "Tôm Các Loại",
+  "parent_id": null
+},
+{
+  "_id": {
+    "$oid": "6927f8c4f5a9cecb4c6d233e"
+  },
+  "category_id": "CT003",
+  "name": "Mực - Bạch Tuộc",
+  "parent_id": null
+},
+{
+  "_id": {
+    "$oid": "6927f8d6f5a9cecb4c6d233f"
+  },
+  "category_id": "CT004",
+  "name": "Tôm Hùm",
+  "parent_id": "CT002"
+},
+{
+  "_id": {
+    "$oid": "6927f8e4f5a9cecb4c6d2340"
+  },
+  "category_id": "CT005",
+  "name": "Tôm Sú/Thẻ",
+  "parent_id": "CT002"
+},
+{
+  "_id": {
+    "$oid": "693a5614c21926afa3a9d2b9"
+  },
+  "category_id": "CT0051",
+  "name": "Nghiêu - Sò - Ốc",
+  "parent_id": null,
+  "__v": 0
+}]

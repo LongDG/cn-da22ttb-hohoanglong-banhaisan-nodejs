@@ -49,7 +49,7 @@ const CartBadge = () => {
 
   return (
     <Link 
-      to={"/customer/cart"}
+      to="/cart"
       className="icon-btn cart-badge tooltip"
       data-label="Giỏ hàng"
       aria-label="Giỏ hàng"

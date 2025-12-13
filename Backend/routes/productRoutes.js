@@ -5,6 +5,7 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 
 // Public routes
 router.get('/', productController.getAllProducts);
+router.get('/top-selling', productController.getTopSellingProducts);
 router.get('/:id', productController.getProductById);
 
 // Admin only routes

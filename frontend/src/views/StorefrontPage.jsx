@@ -4,6 +4,7 @@ import '../styles/storefront.css';
 import productController from '../controllers/productController';
 import ProductCard from '../components/ProductCard';
 import TrustAssuranceBar from '../components/TrustAssuranceBar';
+import TopSellingProducts from '../components/TopSellingProducts';
 
 // Danh sách danh mục với icon
 const CATEGORY_LIST = [
@@ -110,49 +111,8 @@ const StorefrontPage = () => {
 
         {/* Main Content */}
         <main className="storefront-main">
-          {/* Banner Hero Section */}
-          <section className="hero-banner-section">
-            <div className="hero-main-banner">
-              <div className="hero-image-placeholder">
-                <div className="hero-text-overlay">
-                  <h1>SLAY Vị ngon!</h1>
-                  <p>Cua hấp tươi ngon</p>
-                </div>
-              </div>
-            </div>
-            <div className="hero-side-banners">
-              <div className="side-banner king-crab">
-                <h3>King Crab</h3>
-                <p className="hotline">Hotline: 1900 6868</p>
-              </div>
-              <div className="side-banner abalone-kr">
-                <h3>Bào Ngư Hàn Quốc</h3>
-                <p className="price">2.500.000đ</p>
-                <Link to="/product/1" className="buy-btn">MUA NGAY</Link>
-              </div>
-              <div className="side-banner lobster">
-                <h3>Tôm Hùm Bông</h3>
-                <p className="price">1.800.000đ</p>
-                <Link to="/product/2" className="buy-btn">MUA NGAY</Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Banner phụ */}
-          <section className="secondary-banners">
-            <div className="secondary-banner">
-              <div className="banner-content">
-                <h2>Cá Mú Trân Châu</h2>
-                <p>Thượng hạng</p>
-              </div>
-            </div>
-            <div className="secondary-banner">
-              <div className="banner-content">
-                <h2>Bào Ngư Úc</h2>
-                <p>Tinh túy Australia</p>
-              </div>
-            </div>
-          </section>
+          {/* Top Selling Products - Asymmetric Grid */}
+          <TopSellingProducts limit={6} days={30} />
 
           {/* Danh sách sản phẩm */}
           <section className="products-section">

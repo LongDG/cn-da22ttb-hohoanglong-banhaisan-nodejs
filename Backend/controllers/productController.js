@@ -246,3 +246,136 @@ exports.deleteProduct = async (req, res) => {
     });
   }
 };
+
+// Get top selling products
+exports.getTopSellingProducts = async (req, res) => {
+  try {
+    const { limit = 6, days = 30 } = req.query;
+    const limitNum = parseInt(limit);
+    const daysNum = parseInt(days);
+    
+    // Calculate date threshold
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - daysNum);
+    
+    // Aggregate order items to find top selling variants
+    const Order = require('../models/Order');
+    
+    const topVariants = await OrderItem.aggregate([
+      {
+        $lookup: {
+          from: 'Orders',
+          localField: 'order_id',
+          foreignField: 'order_id',
+          as: 'order'
+        }
+      },
+      {
+        $unwind: '$order'
+      },
+      {
+        $match: {
+          'order.order_date': { $gte: dateThreshold },
+          'order.status': { $in: ['completed', 'Hoàn tất', 'shipped'] }
+        }
+      },
+      {
+        $group: {
+          _id: '$variant_id',
+          totalQuantity: { $sum: '$quantity' },
+          totalRevenue: { $sum: { $multiply: ['$quantity', '$price_at_purchase'] } }
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      },
+      {
+        $limit: limitNum * 2
+      }
+    ]);
+    
+    if (topVariants.length === 0) {
+      // No sales data, return featured products instead
+      const products = await Product.find({ status: 'active' }).limit(limitNum);
+      const productsWithVariants = await Promise.all(
+        products.map(async (product) => {
+          const variants = await ProductVariant.find({ product_id: product.product_id });
+          return {
+            ...product.toObject(),
+            variants: variants,
+            sales_metric: 0
+          };
+        })
+      );
+      
+      return res.json({
+        success: true,
+        data: productsWithVariants,
+        count: productsWithVariants.length,
+        message: 'Không có dữ liệu bán hàng, hiển thị sản phẩm nổi bật'
+      });
+    }
+    
+    // Get variant details and their products
+    const variantIds = topVariants.map(v => v._id);
+    const variants = await ProductVariant.find({ variant_id: { $in: variantIds } });
+    
+    // Map variants to products and aggregate by product
+    const productSalesMap = new Map();
+    
+    for (const topVariant of topVariants) {
+      const variant = variants.find(v => v.variant_id === topVariant._id);
+      if (!variant) continue;
+      
+      const productId = variant.product_id;
+      
+      if (!productSalesMap.has(productId)) {
+        productSalesMap.set(productId, {
+          totalQuantity: 0,
+          totalRevenue: 0,
+          variants: []
+        });
+      }
+      
+      const productData = productSalesMap.get(productId);
+      productData.totalQuantity += topVariant.totalQuantity;
+      productData.totalRevenue += topVariant.totalRevenue;
+      productData.variants.push({
+        ...variant.toObject(),
+        salesQuantity: topVariant.totalQuantity,
+        salesRevenue: topVariant.totalRevenue
+      });
+    }
+    
+    // Get top products
+    const topProductIds = Array.from(productSalesMap.entries())
+      .sort((a, b) => b[1].totalQuantity - a[1].totalQuantity)
+      .slice(0, limitNum)
+      .map(entry => entry[0]);
+    
+    const products = await Product.find({ product_id: { $in: topProductIds } });
+    
+    // Combine product info with sales data
+    const result = products.map(product => {
+      const salesData = productSalesMap.get(product.product_id);
+      return {
+        ...product.toObject(),
+        sales_metric: salesData.totalQuantity,
+        revenue: salesData.totalRevenue,
+        variants: salesData.variants
+      };
+    }).sort((a, b) => b.sales_metric - a.sales_metric);
+    
+    res.json({
+      success: true,
+      data: result,
+      count: result.length,
+      period_days: daysNum
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};

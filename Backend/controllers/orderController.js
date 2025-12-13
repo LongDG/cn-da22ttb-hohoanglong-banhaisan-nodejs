@@ -3,6 +3,8 @@ const OrderItem = require('../models/OrderItem');
 const ProductVariant = require('../models/ProductVariant');
 const Payment = require('../models/Payment');
 const { calculateShippingFee } = require('../utils/shippingFee');
+const { generateUniqueOrderCode } = require('../utils/orderCodeGenerator');
+const { nanoid } = require('nanoid');
 const mongoose = require('mongoose');
 
 exports.getAllOrders = async (req, res) => {
@@ -67,9 +69,6 @@ exports.getOrderById = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  
   try {
     const { 
       order_id, 
@@ -78,31 +77,42 @@ exports.createOrder = async (req, res) => {
       discount_amount, 
       notes, 
       items,
-      payment_method = 'COD',
+      payment_method = 'cod',
+      paymentMethod = 'cod',
       distance_km
     } = req.body;
     
     // Use authenticated user's ID
     const user_id = req.user.user_id;
     
+    // Validation
     if (!shipping_address || !items || items.length === 0) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         error: 'Cần có địa chỉ giao hàng và các mặt hàng'
       });
     }
+
+    // Validate payment method
+    const finalPaymentMethod = paymentMethod || payment_method;
+    if (!['cod', 'banking'].includes(finalPaymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phương thức thanh toán không hợp lệ. Chỉ chấp nhận: cod, banking'
+      });
+    }
+
+    // Generate unique order code (SF-XXXXXX)
+    const orderCode = await generateUniqueOrderCode(Order);
+    console.log('[CREATE ORDER] Generated orderCode:', orderCode);
     
     // Validate và calculate total amount (chưa bao gồm phí ship)
     let subtotalAmount = 0;
     const variantUpdates = [];
     
     for (const item of items) {
-      const variant = await ProductVariant.findOne({ variant_id: parseInt(item.variant_id) }).session(session);
+      const variant = await ProductVariant.findOne({ variant_id: item.variant_id });
       if (!variant) {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({
           success: false,
           error: `Không tìm thấy biến thể sản phẩm ${item.variant_id}`
@@ -110,8 +120,6 @@ exports.createOrder = async (req, res) => {
       }
       
       if (variant.stock_quantity < item.quantity) {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({
           success: false,
           error: `Không đủ hàng cho biến thể ${item.variant_id}. Tồn kho: ${variant.stock_quantity}, yêu cầu: ${item.quantity}`
@@ -122,7 +130,7 @@ exports.createOrder = async (req, res) => {
       subtotalAmount += price * item.quantity;
       
       variantUpdates.push({
-        variant_id: parseInt(item.variant_id),
+        variant_id: item.variant_id,
         quantity: parseInt(item.quantity),
         price
       });
@@ -149,118 +157,90 @@ exports.createOrder = async (req, res) => {
     if (order_id !== undefined && order_id !== null && order_id !== '') {
       const provided = parseInt(order_id);
       if (isNaN(provided)) {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({ success: false, error: 'order_id phải là số' });
       }
-      const existsOrder = await Order.findOne({ order_id: provided }).session(session);
+      const existsOrder = await Order.findOne({ order_id: provided });
       if (existsOrder) {
-        await session.abortTransaction();
-        session.endSession();
         return res.status(400).json({ success: false, error: 'order_id đã tồn tại' });
       }
       finalOrderId = provided;
     } else {
-      const lastOrder = await Order.findOne().sort({ order_id: -1 }).session(session);
+      const lastOrder = await Order.findOne().sort({ order_id: -1 });
       finalOrderId = lastOrder ? lastOrder.order_id + 1 : 1001;
     }
     
-    // Xác định trạng thái ban đầu cho đơn COD
-    const initialStatus = payment_method === 'COD' ? 'Chờ xác nhận' : 'pending';
-    const initialPaymentStatus = payment_method === 'COD' ? 'Chưa thanh toán' : 'pending';
-    
-    // Create order với status và payment_status phù hợp
-    const order = await Order.create([{
+    // Create order với orderCode, orderStatus, paymentMethod mới
+    const order = await Order.create({
       order_id: finalOrderId,
+      orderCode,  // SF-XXXXXX format
       user_id: parseInt(user_id),
       shipping_address,
       shipping_fee: finalShippingFee,
       discount_amount: discount_amount || 0,
       total_amount: totalAmount,
       notes: notes || null,
-      status: initialStatus,
-      payment_status: initialPaymentStatus,
-      payment_method: payment_method || 'COD',
+      orderStatus: 'Chờ duyệt',  // New enum field
+      paymentMethod: finalPaymentMethod,  // 'cod' or 'banking'
+      // Backward compatibility
+      status: finalPaymentMethod === 'cod' ? 'Chờ xác nhận' : 'pending',
+      payment_status: finalPaymentMethod === 'cod' ? 'Chưa thanh toán' : 'pending',
+      payment_method: finalPaymentMethod.toUpperCase(),
       distance_km: distance_km || null
-    }], { session });
+    });
     
     // Create order items and update stock
     const orderItems = [];
-    let lastOrderItem = await OrderItem.findOne().sort({ order_item_id: -1 }).session(session);
-    let nextOrderItemId = lastOrderItem ? lastOrderItem.order_item_id + 1 : 1;
 
     for (const item of items) {
-      const variantUpdate = variantUpdates.find(v => v.variant_id === parseInt(item.variant_id));
+      const variantUpdate = variantUpdates.find(v => v.variant_id === item.variant_id);
       const price = variantUpdate.price;
 
-      // allow provided order_item_id per item
-      let finalOrderItemId;
-      if (item.order_item_id !== undefined && item.order_item_id !== null && item.order_item_id !== '') {
-        const providedItemId = parseInt(item.order_item_id);
-        if (isNaN(providedItemId)) {
-          await session.abortTransaction();
-          session.endSession();
-          return res.status(400).json({ success: false, error: `order_item_id ${item.order_item_id} phải là số` });
-        }
-        const existsItem = await OrderItem.findOne({ order_item_id: providedItemId }).session(session);
-        if (existsItem) {
-          await session.abortTransaction();
-          session.endSession();
-          return res.status(400).json({ success: false, error: `order_item_id ${providedItemId} đã tồn tại` });
-        }
-        finalOrderItemId = providedItemId;
-      } else {
-        finalOrderItemId = nextOrderItemId++;
-      }
+      // Generate unique order_item_id using nanoid
+      const order_item_id = nanoid(12); // 12 characters, URL-safe
 
-      const orderItem = await OrderItem.create([{
-        order_item_id: finalOrderItemId,
-        order_id: order[0].order_id,
-        variant_id: parseInt(item.variant_id),
+      const orderItem = await OrderItem.create({
+        order_item_id: order_item_id,
+        order_id: order.order_id,
+        variant_id: item.variant_id,
         quantity: parseInt(item.quantity),
         price_at_purchase: price
-      }], { session });
+      });
 
       // Update stock
       await ProductVariant.findOneAndUpdate(
-        { variant_id: parseInt(item.variant_id) },
-        { $inc: { stock_quantity: -parseInt(item.quantity) } },
-        { session }
+        { variant_id: item.variant_id },
+        { $inc: { stock_quantity: -parseInt(item.quantity) } }
       );
 
-      orderItems.push(orderItem[0]);
+      orderItems.push(orderItem);
     }
     
     // Tạo Payment record cho đơn COD
-    if (payment_method === 'COD') {
-      const lastPayment = await Payment.findOne().sort({ payment_id: -1 }).session(session);
+    if (finalPaymentMethod === 'cod') {
+      const lastPayment = await Payment.findOne().sort({ payment_id: -1 });
       const nextPaymentId = lastPayment ? lastPayment.payment_id + 1 : 1;
       
-      await Payment.create([{
+      await Payment.create({
         payment_id: nextPaymentId,
         order_id: finalOrderId,
         amount: totalAmount,
         payment_method: 'COD',
         status: 'pending',
         payment_status: 'Chưa thanh toán'
-      }], { session });
+      });
     }
-    
-    // Commit transaction
-    await session.commitTransaction();
-    session.endSession();
     
     res.status(201).json({
       success: true,
       data: {
-        ...order[0].toObject(),
-        items: orderItems
+        ...order.toObject(),
+        items: orderItems,
+        orderCode: order.orderCode,  // Include orderCode in response
+        orderStatus: order.orderStatus
       },
       message: 'Đơn hàng đã được tạo thành công'
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     res.status(500).json({
       success: false,
       error: error.message
@@ -320,6 +300,112 @@ exports.updateOrder = async (req, res) => {
       success: true,
       data: order,
       message: `Cập nhật đơn hàng thành công. Trạng thái: ${order.status}`
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Cập nhật trạng thái đơn hàng với logic flow và stock management
+ * Status flow: Chờ duyệt → Đã duyệt → Đang vận chuyển → Đã giao → Hoàn thành
+ * Nếu status = 'Hủy', restore lại stock_quantity
+ */
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { orderStatus } = req.body;
+
+    // Validate orderStatus
+    const validStatuses = ['Chờ duyệt', 'Đã duyệt', 'Đang vận chuyển', 'Đã giao', 'Hoàn thành', 'Hủy'];
+    if (!orderStatus || !validStatuses.includes(orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        error: `orderStatus không hợp lệ. Các trạng thái: ${validStatuses.join(', ')}`
+      });
+    }
+
+    // Find order
+    const order = await Order.findOne({ order_id: parseInt(id) });
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Không tìm thấy đơn hàng'
+      });
+    }
+
+    // Define status flow
+    const statusFlow = {
+      'Chờ duyệt': ['Đã duyệt', 'Hủy'],
+      'Đã duyệt': ['Đang vận chuyển', 'Hủy'],
+      'Đang vận chuyển': ['Đã giao', 'Hủy'],
+      'Đã giao': ['Hoàn thành'],
+      'Hoàn thành': [],
+      'Hủy': []
+    };
+
+    // Check if status transition is valid
+    const currentStatus = order.orderStatus || 'Chờ duyệt';
+    const allowedNextStatuses = statusFlow[currentStatus] || [];
+    
+    if (!allowedNextStatuses.includes(orderStatus) && currentStatus !== orderStatus) {
+      return res.status(400).json({
+        success: false,
+        error: `Không thể chuyển từ "${currentStatus}" sang "${orderStatus}". Trạng thái tiếp theo hợp lệ: ${allowedNextStatuses.join(', ') || 'Không có'}`
+      });
+    }
+
+    // If status is 'Hủy', restore stock quantity
+    if (orderStatus === 'Hủy' && currentStatus !== 'Hủy') {
+      // Get all order items
+      const orderItems = await OrderItem.find({ order_id: parseInt(id) });
+      
+      // Restore stock for each item
+      for (const item of orderItems) {
+        await ProductVariant.findOneAndUpdate(
+          { variant_id: item.variant_id },
+          { $inc: { stock_quantity: parseInt(item.quantity) } }
+        );
+        
+        console.log(`[STOCK RESTORED] Variant ${item.variant_id}: +${item.quantity}`);
+      }
+    }
+
+    // Update order status
+    const updateData = { orderStatus };
+
+    // If status is 'Hoàn thành' and payment method is COD, update payment status
+    if (orderStatus === 'Hoàn thành' && order.payment_method === 'COD') {
+      updateData.payment_status = 'Đã thanh toán';
+      
+      // Also update Payment record
+      await Payment.findOneAndUpdate(
+        { order_id: parseInt(id) },
+        {
+          payment_status: 'Đã thanh toán',
+          status: 'successful'
+        }
+      );
+      
+      console.log(`[COD PAYMENT COMPLETED] Order #${id} - Payment received on delivery`);
+    }
+
+    const updatedOrder = await Order.findOneAndUpdate(
+      { order_id: parseInt(id) },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    console.log(`[ORDER STATUS UPDATE] Order #${id}: ${currentStatus} → ${orderStatus}`);
+
+    res.json({
+      success: true,
+      data: updatedOrder,
+      message: `Cập nhật trạng thái đơn hàng thành công: ${orderStatus}`
     });
   } catch (error) {
     res.status(500).json({

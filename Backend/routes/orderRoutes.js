@@ -10,6 +10,7 @@ router.post('/', authenticate, orderController.createOrder);
 
 // Admin only routes
 router.put('/:id', authenticate, requireAdmin, orderController.updateOrder);
+router.put('/:id/status', authenticate, requireAdmin, orderController.updateOrderStatus);
 router.put('/:id/complete-cod', authenticate, requireAdmin, orderController.completeCODOrder);
 router.delete('/:id', authenticate, requireAdmin, orderController.deleteOrder);
 
