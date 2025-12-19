@@ -17,7 +17,7 @@ exports.getAllOrders = async (req, res) => {
       query.user_id = req.user.user_id;
     } else if (userId) {
       // Admin can filter by userId if provided
-      query.user_id = parseInt(userId);
+      query.user_id = userId;
     }
     
     if (status) {
@@ -41,7 +41,7 @@ exports.getAllOrders = async (req, res) => {
 exports.getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findOne({ order_id: parseInt(id) });
+    const order = await Order.findOne({ order_id: id });
     
     if (!order) {
       return res.status(404).json({
@@ -51,7 +51,7 @@ exports.getOrderById = async (req, res) => {
     }
     
     // Get order items
-    const orderItems = await OrderItem.find({ order_id: parseInt(id) });
+    const orderItems = await OrderItem.find({ order_id: id });
     
     res.json({
       success: true,
@@ -70,6 +70,8 @@ exports.getOrderById = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
+    console.log('[CREATE ORDER] Request body:', JSON.stringify(req.body, null, 2));
+    
     const { 
       order_id, 
       shipping_address, 
@@ -84,6 +86,9 @@ exports.createOrder = async (req, res) => {
     
     // Use authenticated user's ID
     const user_id = req.user.user_id;
+    
+    console.log('[CREATE ORDER] User ID:', user_id);
+    console.log('[CREATE ORDER] Items count:', items?.length);
     
     // Validation
     if (!shipping_address || !items || items.length === 0) {
@@ -110,14 +115,20 @@ exports.createOrder = async (req, res) => {
     let subtotalAmount = 0;
     const variantUpdates = [];
     
+    console.log('[CREATE ORDER] Processing items...');
     for (const item of items) {
+      console.log('[CREATE ORDER] Processing item:', item);
+      
       const variant = await ProductVariant.findOne({ variant_id: item.variant_id });
       if (!variant) {
+        console.error('[CREATE ORDER] Variant not found:', item.variant_id);
         return res.status(400).json({
           success: false,
           error: `Không tìm thấy biến thể sản phẩm ${item.variant_id}`
         });
       }
+      
+      console.log('[CREATE ORDER] Found variant:', variant.variant_id, 'stock:', variant.stock_quantity);
       
       if (variant.stock_quantity < item.quantity) {
         return res.status(400).json({
@@ -136,6 +147,8 @@ exports.createOrder = async (req, res) => {
       });
     }
     
+    console.log('[CREATE ORDER] Subtotal:', subtotalAmount);
+    
     // Áp dụng giảm giá
     subtotalAmount -= discount_amount || 0;
     
@@ -152,39 +165,23 @@ exports.createOrder = async (req, res) => {
     // Tổng tiền cuối cùng = subtotal + phí ship
     const totalAmount = subtotalAmount + finalShippingFee;
     
-    // Determine order_id (accept provided or auto-generate)
-    let finalOrderId;
-    if (order_id !== undefined && order_id !== null && order_id !== '') {
-      const provided = parseInt(order_id);
-      if (isNaN(provided)) {
-        return res.status(400).json({ success: false, error: 'order_id phải là số' });
-      }
-      const existsOrder = await Order.findOne({ order_id: provided });
-      if (existsOrder) {
-        return res.status(400).json({ success: false, error: 'order_id đã tồn tại' });
-      }
-      finalOrderId = provided;
-    } else {
-      const lastOrder = await Order.findOne().sort({ order_id: -1 });
-      finalOrderId = lastOrder ? lastOrder.order_id + 1 : 1001;
-    }
+    // Generate unique order_id using nanoid (không còn auto-increment)
+    const finalOrderId = nanoid(16); // Tạo ID 16 ký tự ngẫu nhiên
+    console.log('[CREATE ORDER] Generated order_id:', finalOrderId);
     
-    // Create order với orderCode, orderStatus, paymentMethod mới
+    // Create order
     const order = await Order.create({
       order_id: finalOrderId,
       orderCode,  // SF-XXXXXX format
-      user_id: parseInt(user_id),
+      user_id: user_id,
       shipping_address,
       shipping_fee: finalShippingFee,
       discount_amount: discount_amount || 0,
       total_amount: totalAmount,
       notes: notes || null,
-      orderStatus: 'Chờ duyệt',  // New enum field
-      paymentMethod: finalPaymentMethod,  // 'cod' or 'banking'
-      // Backward compatibility
-      status: finalPaymentMethod === 'cod' ? 'Chờ xác nhận' : 'pending',
-      payment_status: finalPaymentMethod === 'cod' ? 'Chưa thanh toán' : 'pending',
-      payment_method: finalPaymentMethod.toUpperCase(),
+      status: 'pending',
+      payment_status: finalPaymentMethod === 'cod' ? 'Chưa thanh toán' : 'Đã thanh toán',
+      payment_method: finalPaymentMethod === 'cod' ? 'COD' : 'Bank Transfer',
       distance_km: distance_km || null
     });
     
@@ -254,7 +251,7 @@ exports.updateOrder = async (req, res) => {
     const { status, shipping_address, notes, payment_status } = req.body;
     
     // Validate status
-    const validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled', 'Chờ xác nhận', 'Chờ giao', 'Hoàn tất'];
+    const validStatuses = ['pending', 'processing', 'shipping', 'completed', 'cancelled'];
     if (status && !validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -269,7 +266,7 @@ exports.updateOrder = async (req, res) => {
     if (payment_status !== undefined) updateData.payment_status = payment_status;
     
     const order = await Order.findOneAndUpdate(
-      { order_id: parseInt(id) },
+      { order_id: id },
       updateData,
       { new: true, runValidators: true }
     );
@@ -284,7 +281,7 @@ exports.updateOrder = async (req, res) => {
     // Nếu cập nhật payment_status, cũng cập nhật Payment record
     if (payment_status) {
       await Payment.findOneAndUpdate(
-        { order_id: parseInt(id) },
+        { order_id: id },
         { 
           payment_status: payment_status,
           status: payment_status === 'Đã thanh toán' ? 'successful' : 'pending'
@@ -329,7 +326,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     // Find order
-    const order = await Order.findOne({ order_id: parseInt(id) });
+    const order = await Order.findOne({ order_id: id });
     
     if (!order) {
       return res.status(404).json({
@@ -362,7 +359,7 @@ exports.updateOrderStatus = async (req, res) => {
     // If status is 'Hủy', restore stock quantity
     if (orderStatus === 'Hủy' && currentStatus !== 'Hủy') {
       // Get all order items
-      const orderItems = await OrderItem.find({ order_id: parseInt(id) });
+      const orderItems = await OrderItem.find({ order_id: id });
       
       // Restore stock for each item
       for (const item of orderItems) {
@@ -384,7 +381,7 @@ exports.updateOrderStatus = async (req, res) => {
       
       // Also update Payment record
       await Payment.findOneAndUpdate(
-        { order_id: parseInt(id) },
+        { order_id: id },
         {
           payment_status: 'Đã thanh toán',
           status: 'successful'
@@ -395,7 +392,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     const updatedOrder = await Order.findOneAndUpdate(
-      { order_id: parseInt(id) },
+      { order_id: id },
       updateData,
       { new: true, runValidators: true }
     );
@@ -425,7 +422,7 @@ exports.completeCODOrder = async (req, res) => {
   try {
     const { id } = req.params;
     
-    const order = await Order.findOne({ order_id: parseInt(id) });
+    const order = await Order.findOne({ order_id: id });
     
     if (!order) {
       return res.status(404).json({
@@ -444,7 +441,7 @@ exports.completeCODOrder = async (req, res) => {
     
     // Cập nhật Order
     const updatedOrder = await Order.findOneAndUpdate(
-      { order_id: parseInt(id) },
+      { order_id: id },
       {
         payment_status: 'Đã thanh toán',
         status: 'Hoàn tất'
@@ -454,7 +451,7 @@ exports.completeCODOrder = async (req, res) => {
     
     // Cập nhật Payment
     await Payment.findOneAndUpdate(
-      { order_id: parseInt(id) },
+      { order_id: id },
       {
         payment_status: 'Đã thanh toán',
         status: 'successful'
@@ -482,9 +479,9 @@ exports.deleteOrder = async (req, res) => {
     const { id } = req.params;
     
     // Delete order items first
-    await OrderItem.deleteMany({ order_id: parseInt(id) });
+    await OrderItem.deleteMany({ order_id: id });
     
-    const order = await Order.findOneAndDelete({ order_id: parseInt(id) });
+    const order = await Order.findOneAndDelete({ order_id: id });
     
     if (!order) {
       return res.status(404).json({

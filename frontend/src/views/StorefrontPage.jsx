@@ -1,42 +1,54 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../styles/storefront.css';
 import productController from '../controllers/productController';
 import ProductCard from '../components/ProductCard';
 import TrustAssuranceBar from '../components/TrustAssuranceBar';
 import TopSellingProducts from '../components/TopSellingProducts';
-
-// Danh sách danh mục với icon
-const CATEGORY_LIST = [
-  { id: 'bestseller', name: 'Bán Chạy Nhất', icon: '🔥' },
-  { id: 'imported', name: 'Sản Phẩm Nhập Khẩu / Nội Địa', icon: '🌍' },
-  { id: 'shrimp', name: 'Tôm', icon: '🦐' },
-  { id: 'crab', name: 'Cua – Ghẹ', icon: '🦀' },
-  { id: 'fish', name: 'Cá', icon: '🐟' },
-  { id: 'shellfish', name: 'Nghêu – Sò – Ốc', icon: '🐚' },
-  { id: 'abalone', name: 'Bào Ngư – Hàu', icon: '🦪' },
-  { id: 'mussel', name: 'Vẹm – Bạch Tuộc', icon: '🐙' },
-  { id: 'frozen', name: 'Hải Sản Đông Lạnh', icon: '❄️' },
-  { id: 'sashimi', name: 'Sashimi', icon: '🍣' },
-  { id: 'processed', name: 'Menu Chế Biến', icon: '🍽️' },
-];
+import PartnerSlider from '../components/PartnerSlider';
+import Footer from '../components/Footer';
 
 const StorefrontPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category') || 'all';
+
   const [catalog, setCatalog] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch categories on mount
   useEffect(() => {
     let mounted = true;
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
         const response = await productController.fetchLandingData();
         if (!mounted) return;
-        setCatalog(response.products);
         setCategories(response.categories);
+      } catch (err) {
+        if (!mounted) return;
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Fetch products when category changes
+  useEffect(() => {
+    let mounted = true;
+    setSelectedCategory(categoryParam);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await productController.fetchProductsByCategory(categoryParam);
+        if (!mounted) return;
+        setCatalog(response.products);
       } catch (err) {
         if (!mounted) return;
         setError(err.message);
@@ -44,26 +56,29 @@ const StorefrontPage = () => {
         if (mounted) setLoading(false);
       }
     };
-    fetchData();
+    fetchProducts();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [categoryParam]);
 
   const filteredProducts = useMemo(() => {
-    const byCategory = selectedCategory === 'all'
-      ? catalog
-      : catalog.filter((item) => item.category_id === Number(selectedCategory));
-    if (!searchTerm) return byCategory;
+    if (!searchTerm) return catalog;
     const keyword = searchTerm.toLowerCase();
-    return byCategory.filter((item) =>
+    return catalog.filter((item) =>
       item.name.toLowerCase().includes(keyword) ||
       item.description.toLowerCase().includes(keyword)
     );
-  }, [catalog, selectedCategory, searchTerm]);
+  }, [catalog, searchTerm]);
 
-  const heroProduct = filteredProducts.length > 0 ? filteredProducts[0] : null;
-  const spotlight = filteredProducts.length > 1 ? filteredProducts.slice(1, 4) : [];
+  // Handle category change - update URL
+  const handleCategoryChange = (categoryId) => {
+    if (categoryId === 'all') {
+      navigate('/');
+    } else {
+      navigate(`/?category=${categoryId}`);
+    }
+  };
 
   return (
     <div className="storefront-new">
@@ -80,29 +95,19 @@ const StorefrontPage = () => {
           <nav className="category-nav">
             <button
               className={`category-item ${selectedCategory === 'all' ? 'active' : ''}`}
-              onClick={() => setSelectedCategory('all')}
+              onClick={() => handleCategoryChange('all')}
             >
-              <span className="category-icon">⭐</span>
+              <span className="category-icon">📦</span>
               <span>Tất cả</span>
             </button>
-            {CATEGORY_LIST.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-item ${selectedCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat.id)}
-              >
-                <span className="category-icon">{cat.icon}</span>
-                <span>{cat.name}</span>
-              </button>
-            ))}
-            {/* Map categories từ API */}
+            {/* Map categories từ database */}
             {categories.map((category) => (
               <button
                 key={category.id}
                 className={`category-item ${selectedCategory === String(category.id) ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(String(category.id))}
+                onClick={() => handleCategoryChange(String(category.id))}
               >
-                <span className="category-icon">🦞</span>
+                <span className="category-icon">🔖</span>
                 <span>{category.name}</span>
               </button>
             ))}
@@ -143,6 +148,12 @@ const StorefrontPage = () => {
           </section>
         </main>
       </div>
+
+      {/* Partner Slider - Phía trên Footer */}
+      <PartnerSlider />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

@@ -31,6 +31,21 @@ const productVariantSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     min: 0
+  },
+  weight: {
+    type: Number,
+    default: 1,
+    min: 0
+  },
+  unit: {
+    type: String,
+    default: 'kg',
+    enum: ['kg', 'g', 'lít', 'con']
+  },
+  status: {
+    type: String,
+    default: 'active',
+    enum: ['active', 'inactive']
   }
 }, {
   timestamps: false,

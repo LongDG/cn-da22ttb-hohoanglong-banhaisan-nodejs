@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getOrders, getProducts, getUsers, getVouchers } from '../services/adminService';
+import EditProfileModal from '../components/EditProfileModal';
+import ChangePasswordModal from '../components/ChangePasswordModal';
+import apiClient from '../services/apiClient';
 import '../styles/admin.css';
+import '../styles/ProfilePage.css';
 
 const ProfilePage = () => {
-  const user = JSON.parse(localStorage.getItem('seafresh_user') || '{}');
+  const navigate = useNavigate();
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('seafresh_user') || '{}'));
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [defaultAddress, setDefaultAddress] = useState(null);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalProducts: 0,
@@ -55,6 +63,24 @@ const ProfilePage = () => {
 
     fetchStats();
   }, [user.role]);
+
+  // Fetch default address for customer
+  useEffect(() => {
+    if (user.role === 'customer' && user.user_id) {
+      fetchDefaultAddress();
+    }
+  }, [user.user_id, user.role]);
+
+  const fetchDefaultAddress = async () => {
+    try {
+      const response = await apiClient.get(`/api/addresses?userId=${user.user_id}`);
+      const addresses = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      const defaultAddr = addresses.find(addr => addr.is_default);
+      setDefaultAddress(defaultAddr);
+    } catch (error) {
+      console.error('Fetch default address error:', error);
+    }
+  };
 
   // If admin, show admin dashboard
   if (user.role === 'admin') {
@@ -163,27 +189,179 @@ const ProfilePage = () => {
     );
   }
 
+  // Get first letter of name for avatar
+  const getAvatarLetter = () => {
+    return user.full_name?.charAt(0).toUpperCase() || 'U';
+  };
+
+  // Format joined date
+  const getJoinedDate = () => {
+    if (user.created_at) {
+      return new Date(user.created_at).toLocaleDateString('vi-VN', { 
+        year: 'numeric', 
+        month: 'long' 
+      });
+    }
+    return '2024';
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('seafresh_token');
+    localStorage.removeItem('seafresh_user');
+    navigate('/auth?mode=login');
+  };
+
+  const handleUpdateProfile = (updatedUser) => {
+    // Update localStorage and state
+    const updatedUserData = { ...user, ...updatedUser };
+    localStorage.setItem('seafresh_user', JSON.stringify(updatedUserData));
+    setUser(updatedUserData);
+    // Refresh default address after update
+    fetchDefaultAddress();
+  };
+
   // If customer, show customer profile
   return (
-    <section className="profile-section">
-      <h1>Thông tin tài khoản</h1>
-      <div className="profile-info">
-        <ul>
-          <li>
-            <strong>Họ tên:</strong> {user.full_name || 'Chưa cập nhật'}
-          </li>
-          <li>
-            <strong>Email:</strong> {user.email}
-          </li>
-          <li>
-            <strong>Số điện thoại:</strong> {user.phone_number || 'Chưa cập nhật'}
-          </li>
-          <li>
-            <strong>Vai trò:</strong> Khách hàng
-          </li>
-        </ul>
+    <div className="profile-page">
+      <div className="profile-container">
+        
+        {/* LEFT COLUMN - Profile Card */}
+        <div className="profile-card">
+          <div className="profile-avatar">
+            {getAvatarLetter()}
+          </div>
+          
+          <h2 className="profile-name">{user.full_name || 'Người dùng'}</h2>
+          
+          <span className="profile-role-badge">Khách hàng</span>
+          
+          <p className="profile-joined">
+            Thành viên từ {getJoinedDate()}
+          </p>
+
+          <div className="profile-divider" />
+
+          <div className="profile-stats">
+            <div className="stat-item">
+              <p className="stat-value">0</p>
+              <p className="stat-label">Đơn hàng</p>
+            </div>
+            <div className="stat-item">
+              <p className="stat-value">0</p>
+              <p className="stat-label">Đánh giá</p>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN - Details Card */}
+        <div className="details-card">
+          <div className="details-header">
+            <h2>Thông tin cá nhân</h2>
+            <div className="header-actions">
+              <button className="btn-edit" onClick={() => setIsEditModalOpen(true)}>
+                Chỉnh sửa thông tin
+              </button>
+              <button className="btn-change-password" onClick={() => setIsPasswordModalOpen(true)}>
+                Đổi mật khẩu
+              </button>
+            </div>
+          </div>
+
+          <div className="details-content">
+            <div className="info-grid">
+              <div className="info-field">
+                <label className="info-label">
+                  <span className="info-icon">👤</span>
+                  Họ và tên
+                </label>
+                <input 
+                  type="text" 
+                  className="info-input" 
+                  value={user.full_name || ''} 
+                  readOnly 
+                  placeholder="Chưa cập nhật"
+                />
+              </div>
+
+              <div className="info-field">
+                <label className="info-label">
+                  <span className="info-icon">📧</span>
+                  Email
+                </label>
+                <input 
+                  type="email" 
+                  className="info-input" 
+                  value={user.email || ''} 
+                  readOnly 
+                />
+              </div>
+
+              <div className="info-field">
+                <label className="info-label">
+                  <span className="info-icon">📱</span>
+                  Số điện thoại
+                </label>
+                <input 
+                  type="tel" 
+                  className="info-input" 
+                  value={user.phone_number || ''} 
+                  readOnly 
+                  placeholder="Chưa cập nhật"
+                />
+              </div>
+
+              <div className="info-field">
+                <label className="info-label">
+                  <span className="info-icon">🆔</span>
+                  Mã người dùng
+                </label>
+                <input 
+                  type="text" 
+                  className="info-input" 
+                  value={user.user_id || ''} 
+                  readOnly 
+                />
+              </div>
+
+              <div className="info-field full-width">
+                <label className="info-label">
+                  <span className="info-icon">📍</span>
+                  Địa chỉ mặc định
+                </label>
+                <input 
+                  type="text" 
+                  className="info-input" 
+                  value={defaultAddress ? defaultAddress.full_address : ''} 
+                  readOnly 
+                  placeholder="Chưa có địa chỉ mặc định"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="details-actions">
+            <button className="btn-logout" onClick={handleLogout}>
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+
       </div>
-    </section>
+
+      {/* Modals */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        userData={user}
+        onUpdate={handleUpdateProfile}
+      />
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        userId={user.user_id}
+      />
+    </div>
   );
 };
 

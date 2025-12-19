@@ -44,8 +44,7 @@ const PublicLayout = () => {
     <div className="public-layout">
       <header className="site-header">
         <div className="brand">
-          <span className="brand-mark">SeaFresh</span>
-          <p>Tươi ngon mỗi ngày</p>
+          <img src="/Logo.png" alt="SeaFresh" className="brand-logo" />
         </div>
 
         <nav>
@@ -167,21 +166,6 @@ const PublicLayout = () => {
       </header>
 
       <Outlet />
-
-      <footer className="site-footer" id="story">
-        <div>
-          <h4>SeaFresh</h4>
-          <p>Hải sản được đánh bắt và vận chuyển trong 24 giờ.</p>
-        </div>
-        <div>
-          <p>Hotline</p>
-          <strong>1900 6868</strong>
-        </div>
-        <div>
-          <p>Email</p>
-          <strong>support@seafresh.vn</strong>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -1,0 +1,272 @@
+/* Footer Container */
+.footer-container {
+  width: 100%;
+  background: #0f172a;
+}
+
+/* Top Section - Brand Promise */
+.footer-top {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  padding: 32px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q 25 0, 50 10 T 100 10' stroke='rgba(255,255,255,0.1)' fill='none' stroke-width='2'/%3E%3C/svg%3E") repeat-x;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.footer-slogan {
+  position: relative;
+  color: #ffffff;
+  font-size: 20px;
+  font-style: italic;
+  font-family: Georgia, serif;
+  font-weight: 500;
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.6;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Footer */
+.footer-main {
+  background: #0f172a;
+  padding: 60px 24px;
+}
+
+.footer-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Footer Brand */
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.footer-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.footer-brand h3 {
+  color: #60a5fa;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Footer Heading */
+.footer-heading {
+  color: #60a5fa;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  border-bottom: 2px solid #1e40af;
+  padding-bottom: 8px;
+}
+
+/* Contact Items */
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.contact-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.contact-item strong {
+  color: #60a5fa;
+  font-size: 16px;
+}
+
+/* Footer Links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links li a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+  display: inline-block;
+  position: relative;
+}
+
+.footer-links li a::before {
+  content: '▸';
+  margin-right: 8px;
+  color: #60a5fa;
+  transition: margin-right 0.2s;
+}
+
+.footer-links li a:hover {
+  color: #60a5fa;
+  transform: translateX(4px);
+}
+
+.footer-links li a:hover::before {
+  margin-right: 12px;
+}
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #1e40af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.social-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.social-icon:hover {
+  background: #60a5fa;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+}
+
+/* Certification */
+.certification {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cert-label {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+}
+
+.cert-image {
+  width: 150px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+/* Bottom Section - Copyright */
+.footer-bottom {
+  background: #020617;
+  padding: 20px 24px;
+  text-align: center;
+  border-top: 1px solid #1e293b;
+}
+
+.footer-bottom p {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-top {
+    padding: 24px 16px;
+  }
+
+  .footer-slogan {
+    font-size: 16px;
+  }
+
+  .footer-main {
+    padding: 40px 16px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .footer-column {
+    gap: 16px;
+  }
+
+  .social-icons {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-slogan {
+    font-size: 14px;
+  }
+
+  .footer-brand h3 {
+    font-size: 20px;
+  }
+
+  .footer-heading {
+    font-size: 14px;
+  }
+
+  .contact-item,
+  .footer-links li a {
+    font-size: 13px;
+  }
+}

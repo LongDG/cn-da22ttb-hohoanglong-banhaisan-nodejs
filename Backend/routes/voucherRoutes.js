@@ -3,6 +3,7 @@ const router = express.Router();
 const voucherController = require('../controllers/voucherController');
 
 router.get('/', voucherController.getAllVouchers);
+router.get('/validate/:code', voucherController.validateVoucher);
 router.get('/code/:code', voucherController.getVoucherByCode);
 router.get('/:id', voucherController.getVoucherById);
 router.post('/', voucherController.createVoucher);

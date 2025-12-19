@@ -17,6 +17,22 @@ const productController = {
     };
   },
 
+  async fetchProductsByCategory(categoryId) {
+    const params = categoryId && categoryId !== 'all' ? { categoryId } : {};
+    const [productsRes, variantsRes, categoriesRes] = await Promise.all([
+      getProducts(params),
+      getVariants(),
+      getCategories(),
+    ]);
+
+    const categories = mapCategories(categoriesRes.data || []);
+
+    return {
+      products: mapProductList(productsRes.data || [], variantsRes.data || [], categoriesRes.data || []),
+      categories,
+    };
+  },
+
   async fetchProductDetail(productId) {
     const [productRes, variantsRes, categoriesRes] = await Promise.all([
       getProductById(productId),
