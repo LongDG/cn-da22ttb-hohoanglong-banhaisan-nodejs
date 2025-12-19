@@ -1,0 +1,129 @@
+/* Partner Slider Section */
+.partner-slider-section {
+  background: #f9fafb;
+  padding: 60px 0;
+  overflow: hidden;
+}
+
+.partner-slider-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.partner-slider-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.partner-slider-wrapper {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+/* Track chứa tất cả logos */
+.partner-slider-track {
+  display: flex;
+  gap: 60px;
+  animation: scroll 30s linear infinite;
+  width: max-content;
+}
+
+/* Pause animation khi hover */
+.partner-slider-wrapper:hover .partner-slider-track {
+  animation-play-state: paused;
+}
+
+/* Infinite scroll animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Partner Item */
+.partner-item {
+  flex-shrink: 0;
+  width: 180px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.partner-item img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.partner-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.partner-item:hover img {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .partner-slider-section {
+    padding: 40px 0;
+  }
+
+  .partner-slider-title {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+
+  .partner-slider-track {
+    gap: 30px;
+    animation-duration: 20s;
+  }
+
+  .partner-item {
+    width: 140px;
+    height: 80px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .partner-slider-container {
+    padding: 0 16px;
+  }
+
+  .partner-slider-title {
+    font-size: 18px;
+  }
+
+  .partner-slider-track {
+    gap: 20px;
+  }
+
+  .partner-item {
+    width: 120px;
+    height: 70px;
+    padding: 12px;
+  }
+}

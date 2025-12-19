@@ -276,7 +276,7 @@ exports.getTopSellingProducts = async (req, res) => {
       {
         $match: {
           'order.order_date': { $gte: dateThreshold },
-          'order.status': { $in: ['completed', 'Hoàn tất', 'shipped'] }
+          'order.status': 'completed'
         }
       },
       {

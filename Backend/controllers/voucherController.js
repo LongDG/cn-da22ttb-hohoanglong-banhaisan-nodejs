@@ -182,3 +182,46 @@ exports.deleteVoucher = async (req, res) => {
     });
   }
 };
+
+// Validate voucher for checkout
+exports.validateVoucher = async (req, res) => {
+  try {
+    const { code } = req.params;
+    const voucher = await Voucher.findOne({ code: code.toUpperCase() });
+    
+    if (!voucher) {
+      return res.status(404).json({
+        success: false,
+        error: 'Mã giảm giá không tồn tại'
+      });
+    }
+    
+    // Check if voucher is expired
+    if (voucher.expiry_date && new Date(voucher.expiry_date) < new Date()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Mã giảm giá đã hết hạn'
+      });
+    }
+    
+    // Check usage limit
+    if (voucher.usage_limit !== null && voucher.usage_limit <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Mã giảm giá đã hết lượt sử dụng'
+      });
+    }
+    
+    res.json({
+      voucher_code: voucher.code,
+      discount_type: voucher.discount_type,
+      discount_value: voucher.value,
+      minimum_order_value: voucher.minimum_order_value || 0
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
