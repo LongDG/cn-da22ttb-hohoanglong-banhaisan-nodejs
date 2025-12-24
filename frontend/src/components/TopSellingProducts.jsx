@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import apiClient from '../services/apiClient';
 import './TopSellingProducts.css';
 
-const TopSellingProducts = ({ limit = 6, days = 30 }) => {
+// Hiển thị 5 sản phẩm bán chạy nhất, tránh kéo giãn ảnh gây mờ
+const TopSellingProducts = ({ limit = 5, days = 30 }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,9 +17,14 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
     try {
       setLoading(true);
       const response = await apiClient.get(`/api/products/top-selling?limit=${limit}&days=${days}`);
-      
-      if (response.data.success) {
-        setProducts(response.data.data.slice(0, 6)); // Ensure max 6 products
+
+      // Cho phép cả hai trường hợp: interceptor đã unwrap hoặc chưa
+      console.log('API Response (top-selling):', response);
+      const resData = response?.success ? response : response?.data;
+
+      if (resData && resData.success) {
+        const productsList = Array.isArray(resData.data) ? resData.data : [];
+        setProducts(productsList.slice(0, limit)); // sử dụng limit từ props
       } else {
         setError('Không thể tải sản phẩm bán chạy');
       }
@@ -34,11 +40,11 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
-    }).format(price);
+    }).format(price || 0);
   };
 
   const getDisplayPrice = (product) => {
-    const displayVariant = product.variants && product.variants.length > 0 
+    const displayVariant = product?.variants && product.variants.length > 0 
       ? product.variants[0] 
       : null;
     return displayVariant 
@@ -76,16 +82,16 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
     );
   }
 
-  // Ensure we have at least placeholder products for the grid
+  // Bảo đảm đủ số lượng sản phẩm theo limit (thêm placeholder nếu thiếu)
   const displayProducts = [...products];
-  while (displayProducts.length < 6) {
+  while (displayProducts.length < limit) {
     displayProducts.push(null);
   }
 
-  const ProductCard = ({ product, rank, isHero = false }) => {
+  const ProductCard = ({ product, rank }) => {
     if (!product) {
       return (
-        <div className={`product-card ${isHero ? 'hero-card' : ''} placeholder-card`}>
+        <div className="product-card placeholder-card">
           <div className="card-image-wrapper">
             <div className="placeholder-image">
               <span className="placeholder-icon">🦞</span>
@@ -103,13 +109,21 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
     const displayVariant = product.variants && product.variants.length > 0 
       ? product.variants[0] 
       : null;
+    const isTop1 = rank === 1;
 
     return (
       <Link 
         to={`/product/${product.product_id}`} 
-        className={`product-card ${isHero ? 'hero-card' : ''}`}
+        className={`product-card ${isTop1 ? 'top-1-card' : ''}`}
       >
-        <div className="rank-badge">#{rank}</div>
+        {isTop1 && (
+          <div className="top-1-badge">
+            <span className="top-1-icon">🥇</span>
+            <span className="top-1-text">TOP 1</span>
+          </div>
+        )}
+        
+        {!isTop1 && <div className="rank-badge">#{rank}</div>}
         
         <div className="card-image-wrapper">
           {product.image_url ? (
@@ -127,10 +141,11 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
             <span className="placeholder-icon">🦞</span>
           </div>
           
-          {product.sales_metric > 0 && (
+          {/* Ưu tiên sales_metric, fallback totalSold */}
+          {(product.sales_metric > 0 || product.totalSold > 0) && (
             <div className="sales-badge">
               <span className="sales-icon">⚡</span>
-              Đã bán {product.sales_metric}
+              Đã bán {product.sales_metric || product.totalSold}
             </div>
           )}
         </div>
@@ -138,7 +153,7 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
         <div className="card-content">
           <h3 className="product-title">{product.name}</h3>
           
-          {displayVariant && !isHero && (
+          {displayVariant && (
             <p className="product-variant">{displayVariant.name}</p>
           )}
           
@@ -155,18 +170,6 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
               <span className="current-price">{formatPrice(displayPrice)}</span>
             )}
           </div>
-
-          {isHero && (
-            <>
-              {displayVariant && (
-                <p className="hero-variant">{displayVariant.name}</p>
-              )}
-              <button className="hero-cta-btn">
-                <span className="btn-icon">🛒</span>
-                Mua Ngay
-              </button>
-            </>
-          )}
         </div>
       </Link>
     );
@@ -176,37 +179,17 @@ const TopSellingProducts = ({ limit = 6, days = 30 }) => {
     <section className="top-selling-section">
       <div className="section-header">
         <h2 className="section-title">🔥 BÁN CHẠY NHẤT THÁNG NÀY</h2>
-        <p className="section-subtitle">Top {products.length} sản phẩm được yêu thích nhất</p>
+        <p className="section-subtitle">Top {Math.min(products.length, limit)} sản phẩm được yêu thích nhất</p>
       </div>
 
-      <div className="asymmetric-grid">
-        {/* Top 1 - Hero Product */}
-        <div className="grid-item hero-item">
-          <ProductCard product={displayProducts[0]} rank={1} isHero={true} />
-        </div>
-
-        {/* Top 2 - Below Hero Left */}
-        <div className="grid-item secondary-left">
-          <ProductCard product={displayProducts[1]} rank={2} />
-        </div>
-
-        {/* Top 3 - Below Hero Right */}
-        <div className="grid-item secondary-right">
-          <ProductCard product={displayProducts[2]} rank={3} />
-        </div>
-
-        {/* Top 4, 5, 6 - Right Column Stack */}
-        <div className="grid-item tertiary-top">
-          <ProductCard product={displayProducts[3]} rank={4} />
-        </div>
-
-        <div className="grid-item tertiary-middle">
-          <ProductCard product={displayProducts[4]} rank={5} />
-        </div>
-
-        <div className="grid-item tertiary-bottom">
-          <ProductCard product={displayProducts[5]} rank={6} />
-        </div>
+      <div className="top-selling-grid">
+        {displayProducts.map((product, index) => (
+          <ProductCard 
+            key={product?.product_id || `placeholder-${index}`} 
+            product={product} 
+            rank={index + 1} 
+          />
+        ))}
       </div>
     </section>
   );

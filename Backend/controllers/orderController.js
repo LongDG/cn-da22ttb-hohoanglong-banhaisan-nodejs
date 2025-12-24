@@ -325,6 +325,25 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Map từ tiếng Việt sang tiếng Anh (theo enum trong model)
+    const statusMap = {
+      'Chờ duyệt': 'pending',
+      'Đã duyệt': 'processing',
+      'Đang vận chuyển': 'shipping',
+      'Đã giao': 'shipping', // Đã giao vẫn là shipping trong enum
+      'Hoàn thành': 'completed',
+      'Hủy': 'cancelled'
+    };
+
+    // Map ngược từ tiếng Anh sang tiếng Việt để so sánh
+    const reverseStatusMap = {
+      'pending': 'Chờ duyệt',
+      'processing': 'Đã duyệt',
+      'shipping': 'Đang vận chuyển',
+      'completed': 'Hoàn thành',
+      'cancelled': 'Hủy'
+    };
+
     // Find order
     const order = await Order.findOne({ order_id: id });
     
@@ -334,6 +353,9 @@ exports.updateOrderStatus = async (req, res) => {
         error: 'Không tìm thấy đơn hàng'
       });
     }
+
+    // Get current status in Vietnamese for flow validation
+    const currentStatusVN = reverseStatusMap[order.status] || 'Chờ duyệt';
 
     // Define status flow
     const statusFlow = {
@@ -346,18 +368,17 @@ exports.updateOrderStatus = async (req, res) => {
     };
 
     // Check if status transition is valid
-    const currentStatus = order.orderStatus || 'Chờ duyệt';
-    const allowedNextStatuses = statusFlow[currentStatus] || [];
+    const allowedNextStatuses = statusFlow[currentStatusVN] || [];
     
-    if (!allowedNextStatuses.includes(orderStatus) && currentStatus !== orderStatus) {
+    if (!allowedNextStatuses.includes(orderStatus) && currentStatusVN !== orderStatus) {
       return res.status(400).json({
         success: false,
-        error: `Không thể chuyển từ "${currentStatus}" sang "${orderStatus}". Trạng thái tiếp theo hợp lệ: ${allowedNextStatuses.join(', ') || 'Không có'}`
+        error: `Không thể chuyển từ "${currentStatusVN}" sang "${orderStatus}". Trạng thái tiếp theo hợp lệ: ${allowedNextStatuses.join(', ') || 'Không có'}`
       });
     }
 
     // If status is 'Hủy', restore stock quantity
-    if (orderStatus === 'Hủy' && currentStatus !== 'Hủy') {
+    if (orderStatus === 'Hủy' && currentStatusVN !== 'Hủy') {
       // Get all order items
       const orderItems = await OrderItem.find({ order_id: id });
       
@@ -372,8 +393,9 @@ exports.updateOrderStatus = async (req, res) => {
       }
     }
 
-    // Update order status
-    const updateData = { orderStatus };
+    // Map status từ tiếng Việt sang tiếng Anh để cập nhật vào DB
+    const statusEN = statusMap[orderStatus];
+    const updateData = { status: statusEN };
 
     // If status is 'Hoàn thành' and payment method is COD, update payment status
     if (orderStatus === 'Hoàn thành' && order.payment_method === 'COD') {
@@ -397,7 +419,7 @@ exports.updateOrderStatus = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    console.log(`[ORDER STATUS UPDATE] Order #${id}: ${currentStatus} → ${orderStatus}`);
+    console.log(`[ORDER STATUS UPDATE] Order #${id}: ${currentStatusVN} → ${orderStatus} (${order.status} → ${statusEN})`);
 
     res.json({
       success: true,
@@ -444,7 +466,7 @@ exports.completeCODOrder = async (req, res) => {
       { order_id: id },
       {
         payment_status: 'Đã thanh toán',
-        status: 'Hoàn tất'
+        status: 'completed'
       },
       { new: true, runValidators: true }
     );
