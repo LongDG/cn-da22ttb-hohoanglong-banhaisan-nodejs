@@ -97,14 +97,11 @@ const OrdersPage = () => {
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      pending: { label: 'Chờ xử lý', color: '#f59e0b' },
+      pending: { label: 'Chờ xác nhận', color: '#f59e0b' },
       processing: { label: 'Đang xử lý', color: '#3b82f6' },
-      shipped: { label: 'Đã giao', color: '#8b5cf6' },
+      shipping: { label: 'Đang giao', color: '#8b5cf6' },
       completed: { label: 'Hoàn thành', color: '#10b981' },
       cancelled: { label: 'Đã hủy', color: '#ef4444' },
-      'Chờ xác nhận': { label: 'Chờ xác nhận', color: '#f59e0b' },
-      'Chờ giao': { label: 'Chờ giao', color: '#3b82f6' },
-      'Hoàn tất': { label: 'Hoàn tất', color: '#10b981' },
     };
     const statusInfo = statusMap[status] || { label: status, color: '#6b7280' };
     return (
@@ -175,7 +172,7 @@ const OrdersPage = () => {
       <Modal
         isOpen={modalOpen}
         onClose={handleCloseModal}
-        title={`Chi tiết đơn hàng #${selectedOrder?.order_id}`}
+        title="Chi tiết đơn hàng"
         size="large"
       >
         {orderDetails && (
@@ -252,13 +249,10 @@ const OrdersPage = () => {
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   required
                 >
-                  <option value="pending">Chờ xử lý</option>
-                  <option value="Chờ xác nhận">Chờ xác nhận</option>
+                  <option value="pending">Chờ xác nhận</option>
                   <option value="processing">Đang xử lý</option>
-                  <option value="Chờ giao">Chờ giao</option>
-                  <option value="shipped">Đã giao</option>
+                  <option value="shipping">Đang giao</option>
                   <option value="completed">Hoàn thành</option>
-                  <option value="Hoàn tất">Hoàn tất</option>
                   <option value="cancelled">Đã hủy</option>
                 </select>
               </div>

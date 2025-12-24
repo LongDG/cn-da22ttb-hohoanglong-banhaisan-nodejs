@@ -70,7 +70,7 @@ exports.createReview = async (req, res) => {
       finalReviewId = lastReview ? lastReview.review_id + 1 : 1;
     }
 
-    const review = await Review.create({ review_id: finalReviewId, product_id: parseInt(product_id), user_id: parseInt(user_id), rating: parseInt(rating), comment: comment || null });
+    const review = await Review.create({ review_id: finalReviewId, product_id: product_id, user_id: user_id, rating: parseInt(rating), comment: comment || null });
     res.status(201).json({ success: true, data: review, message: 'Review created successfully' });
   } catch (error) {
     res.status(500).json({

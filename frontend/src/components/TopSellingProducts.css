@@ -1,0 +1,435 @@
+/* ============================================
+   TOP SELLING PRODUCTS - ASYMMETRIC GRID LAYOUT
+   ============================================ */
+
+.top-selling-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 16px;
+}
+
+/* Section Header */
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Grid Layout - 4 cột đều nhau */
+.top-selling-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 1279px) {
+  .top-selling-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1023px) {
+  .top-selling-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .top-selling-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Product Card Base */
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.placeholder-card {
+  opacity: 0.6;
+  cursor: default;
+  pointer-events: none;
+}
+
+.placeholder-card:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Top 1 Card Special Styling */
+.top-1-card {
+  border: 3px solid #fbbf24;
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3),
+              0 0 0 1px rgba(251, 191, 36, 0.2),
+              0 0 20px rgba(251, 191, 36, 0.15);
+  position: relative;
+  overflow: visible;
+  animation: top1-glow 2s ease-in-out infinite;
+}
+
+@keyframes top1-glow {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3),
+                0 0 0 1px rgba(251, 191, 36, 0.2),
+                0 0 20px rgba(251, 191, 36, 0.15);
+  }
+  50% {
+    box-shadow: 0 6px 24px rgba(251, 191, 36, 0.4),
+                0 0 0 2px rgba(251, 191, 36, 0.3),
+                0 0 30px rgba(251, 191, 36, 0.25);
+  }
+}
+
+.top-1-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4),
+              0 0 0 2px rgba(251, 191, 36, 0.4),
+              0 0 40px rgba(251, 191, 36, 0.3);
+}
+
+/* Top 1 Badge */
+.top-1-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #1a1a1a;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 800;
+  font-size: 0.9rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5),
+              0 0 0 2px rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  animation: badge-bounce 2s ease-in-out infinite;
+}
+
+@keyframes badge-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.top-1-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.top-1-text {
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+
+/* Rank Badge */
+.rank-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+}
+
+/* Card Image */
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 58%;
+  min-height: 180px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f0 100%);
+}
+
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover .card-image {
+  transform: scale(1.02); /* Giảm zoom để tránh mờ ảnh nhỏ */
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  opacity: 0.7;
+}
+
+
+/* Sales Badge */
+.sales-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(26, 71, 42, 0.95);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+.sales-icon {
+  font-size: 1rem;
+}
+
+/* Card Content */
+.card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+
+.product-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-variant {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  opacity: 0.8;
+}
+
+
+/* Price Section */
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.current-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d32f2f;
+}
+
+.sale-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d32f2f;
+}
+
+.original-price {
+  font-size: 1rem;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  background: #ff4444;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #666;
+  font-style: italic;
+  font-size: 1rem;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Mobile - max 767px */
+@media (max-width: 767px) {
+  .top-selling-section {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .card-image-wrapper {
+    min-height: 180px;
+  }
+
+  .rank-badge {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .product-title {
+    font-size: 1rem;
+  }
+
+  .current-price,
+  .sale-price {
+    font-size: 1.3rem;
+  }
+}
+
+/* Extra Small Mobile - max 480px */
+@media (max-width: 480px) {
+  .top-selling-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .card-content {
+    padding: 1rem;
+  }
+
+  .product-title {
+    font-size: 0.95rem;
+  }
+
+  .card-image-wrapper {
+    min-height: 150px;
+  }
+}
+
+/* Prevent horizontal scroll */
+html,
+body {
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+

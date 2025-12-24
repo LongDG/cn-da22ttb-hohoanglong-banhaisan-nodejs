@@ -1,41 +1,70 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import '../styles/storefront.css';
 import productController from '../controllers/productController';
 import ProductCard from '../components/ProductCard';
 import TrustAssuranceBar from '../components/TrustAssuranceBar';
-
-// Danh sách danh mục với icon
-const CATEGORY_LIST = [
-  { id: 'bestseller', name: 'Bán Chạy Nhất', icon: '🔥' },
-  { id: 'imported', name: 'Sản Phẩm Nhập Khẩu / Nội Địa', icon: '🌍' },
-  { id: 'shrimp', name: 'Tôm', icon: '🦐' },
-  { id: 'crab', name: 'Cua – Ghẹ', icon: '🦀' },
-  { id: 'fish', name: 'Cá', icon: '🐟' },
-  { id: 'shellfish', name: 'Nghêu – Sò – Ốc', icon: '🐚' },
-  { id: 'abalone', name: 'Bào Ngư – Hàu', icon: '🦪' },
-  { id: 'mussel', name: 'Vẹm – Bạch Tuộc', icon: '🐙' },
-  { id: 'frozen', name: 'Hải Sản Đông Lạnh', icon: '❄️' },
-  { id: 'sashimi', name: 'Sashimi', icon: '🍣' },
-  { id: 'processed', name: 'Menu Chế Biến', icon: '🍽️' },
-];
+import TopSellingProducts from '../components/TopSellingProducts';
+import PartnerSlider from '../components/PartnerSlider';
+import Footer from '../components/Footer';
 
 const StorefrontPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category') || 'all';
+
   const [catalog, setCatalog] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarProducts, setSidebarProducts] = useState([]);
+  
+  // Xác định xem có đang chọn danh mục cụ thể hay không
+  const isCategorySelected = categoryParam !== 'all';
+  
+  // Lấy tên danh mục được chọn
+  const selectedCategoryName = useMemo(() => {
+    if (!isCategorySelected) return null;
+    const category = categories.find(cat => String(cat.id) === categoryParam);
+    return category ? category.name : null;
+  }, [categories, categoryParam, isCategorySelected]);
 
+  // Fetch categories on mount
   useEffect(() => {
     let mounted = true;
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
         const response = await productController.fetchLandingData();
         if (!mounted) return;
-        setCatalog(response.products);
         setCategories(response.categories);
+        // Lấy một số sản phẩm ngẫu nhiên cho sidebar
+        if (response.products && response.products.length > 0) {
+          const shuffled = [...response.products].sort(() => 0.5 - Math.random());
+          setSidebarProducts(shuffled.slice(0, 3));
+        }
+      } catch (err) {
+        if (!mounted) return;
+        console.error('Error fetching categories:', err);
+      }
+    };
+    fetchCategories();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Fetch products when category changes
+  useEffect(() => {
+    let mounted = true;
+    setSelectedCategory(categoryParam);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await productController.fetchProductsByCategory(categoryParam);
+        if (!mounted) return;
+        setCatalog(response.products);
       } catch (err) {
         if (!mounted) return;
         setError(err.message);
@@ -43,26 +72,30 @@ const StorefrontPage = () => {
         if (mounted) setLoading(false);
       }
     };
-    fetchData();
+    fetchProducts();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [categoryParam]);
 
   const filteredProducts = useMemo(() => {
-    const byCategory = selectedCategory === 'all'
-      ? catalog
-      : catalog.filter((item) => item.category_id === Number(selectedCategory));
-    if (!searchTerm) return byCategory;
+    if (!searchTerm) return catalog;
     const keyword = searchTerm.toLowerCase();
-    return byCategory.filter((item) =>
+    return catalog.filter((item) =>
       item.name.toLowerCase().includes(keyword) ||
       item.description.toLowerCase().includes(keyword)
     );
-  }, [catalog, selectedCategory, searchTerm]);
+  }, [catalog, searchTerm]);
 
-  const heroProduct = filteredProducts.length > 0 ? filteredProducts[0] : null;
-  const spotlight = filteredProducts.length > 1 ? filteredProducts.slice(1, 4) : [];
+  // Handle category change - update URL
+  const handleCategoryChange = (categoryId) => {
+    if (categoryId === 'all') {
+      navigate('/');
+    } else {
+      navigate(`/?category=${categoryId}`);
+    }
+  };
+
 
   return (
     <div className="storefront-new">
@@ -79,85 +112,66 @@ const StorefrontPage = () => {
           <nav className="category-nav">
             <button
               className={`category-item ${selectedCategory === 'all' ? 'active' : ''}`}
-              onClick={() => setSelectedCategory('all')}
+              onClick={() => handleCategoryChange('all')}
             >
-              <span className="category-icon">⭐</span>
               <span>Tất cả</span>
             </button>
-            {CATEGORY_LIST.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-item ${selectedCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat.id)}
-              >
-                <span className="category-icon">{cat.icon}</span>
-                <span>{cat.name}</span>
-              </button>
-            ))}
-            {/* Map categories từ API */}
+            {/* Map categories từ database */}
             {categories.map((category) => (
               <button
                 key={category.id}
                 className={`category-item ${selectedCategory === String(category.id) ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(String(category.id))}
+                onClick={() => handleCategoryChange(String(category.id))}
               >
-                <span className="category-icon">🦞</span>
                 <span>{category.name}</span>
               </button>
             ))}
           </nav>
+
+          {/* Sidebar Products */}
+          {sidebarProducts.length > 0 && (
+            <div className="sidebar-products">
+              <div className="sidebar-products-header">
+                <h3>✨ Sản phẩm nổi bật</h3>
+              </div>
+              <div className="sidebar-products-list">
+                {sidebarProducts.map((product) => (
+                  <Link 
+                    key={product.id} 
+                    to={`/product/${product.id}`}
+                    className="sidebar-product-item"
+                  >
+                    <div className="sidebar-product-image">
+                      <img
+                        src={product.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836'}
+                        alt={product.name}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="sidebar-product-info">
+                      <h4>{product.name}</h4>
+                      <p className="sidebar-product-price">{product.displayPrice}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </aside>
 
         {/* Main Content */}
         <main className="storefront-main">
-          {/* Banner Hero Section */}
-          <section className="hero-banner-section">
-            <div className="hero-main-banner">
-              <div className="hero-image-placeholder">
-                <div className="hero-text-overlay">
-                  <h1>SLAY Vị ngon!</h1>
-                  <p>Cua hấp tươi ngon</p>
-                </div>
-              </div>
-            </div>
-            <div className="hero-side-banners">
-              <div className="side-banner king-crab">
-                <h3>King Crab</h3>
-                <p className="hotline">Hotline: 1900 6868</p>
-              </div>
-              <div className="side-banner abalone-kr">
-                <h3>Bào Ngư Hàn Quốc</h3>
-                <p className="price">2.500.000đ</p>
-                <Link to="/product/1" className="buy-btn">MUA NGAY</Link>
-              </div>
-              <div className="side-banner lobster">
-                <h3>Tôm Hùm Bông</h3>
-                <p className="price">1.800.000đ</p>
-                <Link to="/product/2" className="buy-btn">MUA NGAY</Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Banner phụ */}
-          <section className="secondary-banners">
-            <div className="secondary-banner">
-              <div className="banner-content">
-                <h2>Cá Mú Trân Châu</h2>
-                <p>Thượng hạng</p>
-              </div>
-            </div>
-            <div className="secondary-banner">
-              <div className="banner-content">
-                <h2>Bào Ngư Úc</h2>
-                <p>Tinh túy Australia</p>
-              </div>
-            </div>
-          </section>
+          {/* Top Selling Products - Chỉ hiển thị khi chọn "Tất cả" */}
+          {!isCategorySelected && <TopSellingProducts limit={8} days={30} />}
 
           {/* Danh sách sản phẩm */}
           <section className="products-section">
             <div className="products-header">
-              <h2>Sản phẩm nổi bật</h2>
+              <h2>
+                {isCategorySelected && selectedCategoryName 
+                  ? selectedCategoryName 
+                  : 'Sản phẩm nổi bật'}
+              </h2>
               <div className="search-bar">
                 <input
                   type="search"
@@ -183,6 +197,12 @@ const StorefrontPage = () => {
           </section>
         </main>
       </div>
+
+      {/* Partner Slider - Phía trên Footer */}
+      <PartnerSlider />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

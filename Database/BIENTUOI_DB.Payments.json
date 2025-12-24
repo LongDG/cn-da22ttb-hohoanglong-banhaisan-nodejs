@@ -13,8 +13,8 @@
   "_id": {
     "$oid": "6927fd5ef5a9cecb4c6d236f"
   },
-  "payment_id": 2,
-  "order_id": 9002,
+  "payment_id": "PM002",
+  "order_id": "OD9002",
   "amount": 2770000,
   "payment_method": "VNPay",
   "status": "successful",

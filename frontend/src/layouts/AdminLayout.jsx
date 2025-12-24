@@ -17,7 +17,8 @@ const AdminLayout = () => {
   const menuItems = [
     { path: '/admin', label: 'Tổng quan', icon: '📊' },
     { path: '/admin/products', label: 'Sản phẩm', icon: '🦐' },
-    { path: '/admin/orders', label: 'Đơn hàng', icon: '📦' },
+    { path: '/admin/product-variants', label: 'Biến thể SP', icon: '📦' },
+    { path: '/admin/orders', label: 'Đơn hàng', icon: '🛍️' },
     { path: '/admin/carts', label: 'Giỏ hàng', icon: '🛒' },
     { path: '/admin/users', label: 'Người dùng', icon: '👥' },
     { path: '/admin/categories', label: 'Danh mục', icon: '📁' },

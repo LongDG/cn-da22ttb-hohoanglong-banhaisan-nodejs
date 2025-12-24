@@ -103,7 +103,7 @@ exports.addItemToCart = async (req, res) => {
     // Check if item already exists in cart
     const existingItem = await CartItem.findOne({
       cart_id: cart.cart_id,
-      variant_id: parseInt(variant_id)
+      variant_id: variant_id
     });
     
     if (existingItem) {
@@ -144,7 +144,7 @@ exports.addItemToCart = async (req, res) => {
       const cartItem = await CartItem.create({
         cart_item_id,
         cart_id: cart.cart_id,
-        variant_id: parseInt(variant_id),
+        variant_id: variant_id,
         quantity: parseInt(quantity)
       });
       
@@ -181,7 +181,7 @@ exports.updateCartItem = async (req, res) => {
       });
     }
     
-    const cartItem = await CartItem.findOne({ cart_item_id: parseInt(id) });
+    const cartItem = await CartItem.findOne({ cart_item_id: id });
     if (!cartItem) {
       return res.status(404).json({
         success: false,
@@ -241,7 +241,7 @@ exports.removeCartItem = async (req, res) => {
     const { id } = req.params;
     const user_id = req.user.user_id;
     
-    const cartItem = await CartItem.findOne({ cart_item_id: parseInt(id) });
+    const cartItem = await CartItem.findOne({ cart_item_id: id });
     if (!cartItem) {
       return res.status(404).json({
         success: false,
@@ -258,7 +258,7 @@ exports.removeCartItem = async (req, res) => {
       });
     }
     
-    await CartItem.findOneAndDelete({ cart_item_id: parseInt(id) });
+    await CartItem.findOneAndDelete({ cart_item_id: id });
     
     await Cart.findOneAndUpdate(
       { cart_id: cart.cart_id },
@@ -341,7 +341,7 @@ exports.getAllCarts = async (req, res) => {
 exports.getCartByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
-    const cart = await Cart.findOne({ user_id: parseInt(userId) });
+    const cart = await Cart.findOne({ user_id: userId });
     
     if (!cart) {
       return res.status(404).json({

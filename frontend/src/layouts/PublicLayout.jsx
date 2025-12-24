@@ -44,8 +44,7 @@ const PublicLayout = () => {
     <div className="public-layout">
       <header className="site-header">
         <div className="brand">
-          <span className="brand-mark">SeaFresh</span>
-          <p>Tươi ngon mỗi ngày</p>
+          <img src="/Logo.png" alt="SeaFresh" className="brand-logo" />
         </div>
 
         <nav>
@@ -65,9 +64,6 @@ const PublicLayout = () => {
           <CartBadge />
           {isLoggedIn ? (
             <>
-              <span className="header-greeting">
-                Xin chào, {user?.full_name || user?.email || 'bạn'}
-              </span>
               {/* Tài khoản: icon tròn với dropdown */}
               <div className="account-wrapper">
                 <button
@@ -91,35 +87,72 @@ const PublicLayout = () => {
                 </button>
                 {accountMenuOpen && (
                   <div className="account-dropdown">
-                    <Link
-                      to="/customer/profile"
-                      className="dropdown-item"
-                      onClick={() => setAccountMenuOpen(false)}
-                    >
-                      Tài khoản
-                    </Link>
-                    <Link
-                      to="/customer/orders"
-                      className="dropdown-item"
-                      onClick={() => setAccountMenuOpen(false)}
-                    >
-                      Đơn hàng
-                    </Link>
-                    {user?.role === 'admin' && (
+                    {/* Khu vực 1: User Header */}
+                    <div className="dropdown-header">
+                      <div className="dropdown-avatar">
+                        {(user?.full_name || user?.email || 'U')[0].toUpperCase()}
+                      </div>
+                      <div className="dropdown-user-info">
+                        <div className="dropdown-user-name">
+                          {user?.full_name || 'Người dùng'}
+                        </div>
+                        <div className="dropdown-user-email">
+                          {user?.email}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="dropdown-divider"></div>
+
+                    {/* Khu vực 2: Cá nhân */}
+                    <div className="dropdown-section">
                       <Link
-                        to="/admin"
+                        to="/customer/profile"
                         className="dropdown-item"
                         onClick={() => setAccountMenuOpen(false)}
                       >
-                        Quay lại admin
+                        <span className="dropdown-icon">👤</span>
+                        Tài khoản
                       </Link>
+                      <Link
+                        to="/customer/orders"
+                        className="dropdown-item"
+                        onClick={() => setAccountMenuOpen(false)}
+                      >
+                        <span className="dropdown-icon">📦</span>
+                        Đơn hàng của tôi
+                      </Link>
+                    </div>
+
+                    {/* Khu vực 3: Quản trị (chỉ hiện nếu là admin) */}
+                    {user?.role === 'admin' && (
+                      <>
+                        <div className="dropdown-divider"></div>
+                        <div className="dropdown-section">
+                          <Link
+                            to="/admin"
+                            className="dropdown-item admin-link"
+                            onClick={() => setAccountMenuOpen(false)}
+                          >
+                            <span className="dropdown-icon">⚙️</span>
+                            Quay lại trang Admin
+                          </Link>
+                        </div>
+                      </>
                     )}
-                    <button
-                      className="dropdown-item logout-btn"
-                      onClick={handleLogout}
-                    >
-                      Đăng xuất
-                    </button>
+
+                    <div className="dropdown-divider"></div>
+
+                    {/* Khu vực 4: Đăng xuất */}
+                    <div className="dropdown-section">
+                      <button
+                        className="dropdown-item logout-btn"
+                        onClick={handleLogout}
+                      >
+                        <span className="dropdown-icon">🚪</span>
+                        Đăng xuất
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -133,21 +166,6 @@ const PublicLayout = () => {
       </header>
 
       <Outlet />
-
-      <footer className="site-footer" id="story">
-        <div>
-          <h4>SeaFresh</h4>
-          <p>Hải sản được đánh bắt và vận chuyển trong 24 giờ.</p>
-        </div>
-        <div>
-          <p>Hotline</p>
-          <strong>1900 6868</strong>
-        </div>
-        <div>
-          <p>Email</p>
-          <strong>support@seafresh.vn</strong>
-        </div>
-      </footer>
     </div>
   );
 };

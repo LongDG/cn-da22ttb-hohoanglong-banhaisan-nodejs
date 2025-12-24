@@ -170,3 +170,71 @@ exports.deleteUser = async (req, res) => {
     });
   }
 };
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { old_password, new_password } = req.body;
+
+    // Validation
+    if (!old_password || !new_password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng cung cấp mật khẩu cũ và mật khẩu mới'
+      });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự'
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({ user_id: id });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy người dùng'
+      });
+    }
+
+    // Verify old password
+    const isMatch = await bcrypt.compare(old_password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu hiện tại không đúng'
+      });
+    }
+
+    // Check if new password is same as old
+    const isSameAsOld = await bcrypt.compare(new_password, user.password);
+    if (isSameAsOld) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại'
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(new_password, salt);
+
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Đổi mật khẩu thành công'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Lỗi khi đổi mật khẩu'
+    });
+  }
+};

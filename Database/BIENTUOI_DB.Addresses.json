@@ -2,8 +2,8 @@
   "_id": {
     "$oid": "6911a51a7118cc1682f668fe"
   },
-  "address_id": 1,
-  "user_id": 1,
+  "address_id": "A001",
+  "user_id": "U001",
   "recipient_name": "Nguyễn Văn Bi",
   "phone_number": "0909123456",
   "full_address": "Số 284, Đường Đồng khởi, Phường 6,Vĩnh Long ",
@@ -13,8 +13,8 @@
   "_id": {
     "$oid": "6911a52b7118cc1682f668ff"
   },
-  "address_id": 2,
-  "user_id": 1,
+  "address_id": "A002",
+  "user_id": "U001",
   "recipient_name": "Nguyễn Văn Bi",
   "phone_number": "0909123456",
   "full_address": "Số 14 Ấp hai thủ, Long Hòa, Châu thành,Vĩnh Long",
@@ -24,11 +24,35 @@
   "_id": {
     "$oid": "692930b572a645ecccb3c091"
   },
-  "address_id": 3,
-  "user_id": 1,
+  "address_id": "A003",
+  "user_id": "U001",
   "recipient_name": "Nguyễn Văn A",
   "phone_number": "0909123456",
   "full_address": "Số 789, Đường DEF, Quận 3, TP.HCM",
   "is_default": false,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "692bf1ac5426d1e77c271e4b"
+  },
+  "address_id": "A004",
+  "user_id": "U002",
+  "recipient_name": "Quý",
+  "phone_number": "0383277120",
+  "full_address": "hai thu tra vinh",
+  "is_default": true,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "692e823cfc2d0e632106ce89"
+  },
+  "address_id": "A005",
+  "user_id": "U101",
+  "recipient_name": "aiasfjoi",
+  "phone_number": "05184494848",
+  "full_address": "Nhapidjeiofjo8er8fioe2hf",
+  "is_default": true,
   "__v": 0
 }]

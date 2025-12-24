@@ -15,6 +15,7 @@ const CustomerPortal = () => {
     const fetchStats = async () => {
       try {
         if (user.user_id) {
+          // Fetch orders
           const ordersRes = await getOrders({ userId: user.user_id });
           const orders = ordersRes.data || [];
           
@@ -33,9 +34,28 @@ const CustomerPortal = () => {
             })
             .reduce((sum, order) => sum + (order.total_amount || 0), 0);
           
+          // Fetch vouchers
+          let validVouchersCount = 0;
+          try {
+            const vouchersRes = await fetch('http://localhost:3000/api/vouchers');
+            const vouchersData = await vouchersRes.json();
+            
+            if (vouchersData.success) {
+              // Count only valid vouchers (not expired and has usage limit)
+              const now = new Date();
+              validVouchersCount = vouchersData.data.filter(voucher => {
+                const isNotExpired = !voucher.expiry_date || new Date(voucher.expiry_date) > now;
+                const hasUsageLeft = !voucher.usage_limit || voucher.usage_limit > 0;
+                return isNotExpired && hasUsageLeft;
+              }).length;
+            }
+          } catch (voucherError) {
+            console.error('Error fetching vouchers:', voucherError);
+          }
+          
           setStats({
             pendingOrders,
-            vouchers: 0, // TODO: Implement voucher count when voucher API is ready
+            vouchers: validVouchersCount,
             monthlySpending,
             loading: false
           });

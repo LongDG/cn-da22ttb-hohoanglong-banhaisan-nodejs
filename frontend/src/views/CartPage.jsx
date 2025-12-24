@@ -1,27 +1,33 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   getCart, 
   updateCartItemByVariant, 
   removeCartItemByVariant, 
   clearCart 
 } from '../services/cartService';
-import { createOrder } from '../services/orderService';
 import { enrichLocalCartItems } from '../utils/cartHelpers';
-import CheckoutModal from '../components/checkout/CheckoutModal';
 import '../styles/cart.css';
 
 const CartPage = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     fetchCart();
   }, []);
+
+  // Auto-navigate to checkout page if ?checkout=true
+  useEffect(() => {
+    const shouldCheckout = searchParams.get('checkout');
+    if (shouldCheckout === 'true' && cart && cart.items && cart.items.length > 0) {
+      console.log('[CART PAGE] Auto-navigating to checkout page from Buy Now flow');
+      navigate('/checkout');
+    }
+  }, [cart, searchParams, navigate]);
 
   const fetchCart = async () => {
     try {
@@ -35,6 +41,13 @@ const CartPage = () => {
           const enrichedItems = await enrichLocalCartItems(cartData.items);
           cartData = { ...cartData, items: enrichedItems };
         }
+        
+        // LƯU VÀO LOCALSTORAGE để CheckoutPage có thể dùng
+        localStorage.setItem('checkout_cart', JSON.stringify(cartData.items));
+        console.log('[CART PAGE] Saved', cartData.items.length, 'items to localStorage');
+      } else {
+        // Giỏ hàng rỗng - xóa localStorage
+        localStorage.removeItem('checkout_cart');
       }
       
       setCart(cartData);
@@ -91,34 +104,7 @@ const CartPage = () => {
       return;
     }
 
-    setShowCheckout(true);
-  };
-
-  const handleCheckoutComplete = async (checkoutData) => {
-    setIsProcessing(true);
-    try {
-      const orderData = {
-        shipping_address: checkoutData.shipping_address,
-        shipping_fee: 30000,
-        items: cart.items.map(item => ({
-          variant_id: item.variant_id,
-          quantity: item.quantity
-        }))
-      };
-
-      const result = await createOrder(orderData);
-      
-      // Clear cart after successful order
-      await clearCart();
-      
-      alert(`Đặt hàng thành công! Mã đơn hàng: ${result.data.order_id}`);
-      navigate('/customer/orders');
-    } catch (err) {
-      alert('Lỗi: ' + err.message);
-      throw err;
-    } finally {
-      setIsProcessing(false);
-    }
+    navigate('/checkout');
   };
 
   const calculateTotal = () => {
@@ -273,18 +259,11 @@ const CartPage = () => {
           )}
           <button
             onClick={handleCheckout}
-            disabled={isProcessing || !localStorage.getItem('seafresh_token')}
+            disabled={!localStorage.getItem('seafresh_token')}
             className="btn-checkout"
           >
-            {isProcessing ? 'Đang xử lý...' : 'Thanh toán'}
+            Thanh toán
           </button>
-
-          <CheckoutModal
-            isOpen={showCheckout}
-            onClose={() => setShowCheckout(false)}
-            cartItems={cart?.items || []}
-            onComplete={handleCheckoutComplete}
-          />
           
           <Link to="/" className="btn-continue">
             Tiếp tục mua sắm

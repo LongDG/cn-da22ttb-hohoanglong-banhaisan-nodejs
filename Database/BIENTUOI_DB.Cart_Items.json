@@ -1,10 +1,20 @@
 [{
   "_id": {
-    "$oid": "692bd64a9e6428557437b5a4"
+    "$oid": "692bf1905426d1e77c271e34"
   },
-  "cart_item_id": 1,
-  "cart_id": 1,
-  "variant_id": 1,
+  "cart_item_id": "CI001",
+  "cart_id": "C001",
+  "variant_id": "V003",
+  "quantity": 2,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "692bfb38a036c1ed457cc799"
+  },
+  "cart_item_id": "CI002",
+  "cart_id": "C002",
+  "variant_id": "V005",
   "quantity": 2,
   "__v": 0
 }]

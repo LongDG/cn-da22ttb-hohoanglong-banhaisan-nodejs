@@ -2,7 +2,7 @@
   "_id": {
     "$oid": "6911a3eb7118cc1682f668f6"
   },
-  "user_id": 1,
+  "user_id": "U001",
   "full_name": "Nguyễn Văn Bi",
   "email": "nguyenvanbi@gmail.com",
   "password": "12345",
@@ -16,10 +16,10 @@
   "_id": {
     "$oid": "6911a4b57118cc1682f668fd"
   },
-  "user_id": 2,
+  "user_id": "U002",
   "full_name": "Hồ Hoàng Long",
   "email": "110122107ts@gmail.com",
-  "password": "$2a$10$EZd6XLWm0CDGSLEc8WRl1O2Z9mtlQpe7rvw7HCdEMgcsLe1RpdTPK",
+  "password": "$2a$10$c.m08QK5wIlVSvd50NSqz.JsJXKo4eF6lPMM9z3ec7TDKpSMurIqm",
   "phone_number": "0383277120",
   "role": "admin",
   "created_at": {
@@ -30,7 +30,7 @@
   "_id": {
     "$oid": "69280f23f5a9cecb4c6d237a"
   },
-  "user_id": 3,
+  "user_id": "U003",
   "full_name": "Võ Nhật Duy Nam",
   "email": "namvo.it@gmail.com",
   "password": "12345",
@@ -42,7 +42,7 @@
   "_id": {
     "$oid": "69294f2e4129694343440ef2"
   },
-  "user_id": 100,
+  "user_id": "U100",
   "full_name": "Nguyễn A",
   "email": "nguyena@example.com",
   "password": "$2a$10$RPpY.TSR34UKt9qOmA.pg.iEkj2TxgxTyIW3/dV6WESiJhFZ83QcC",
@@ -57,14 +57,59 @@
   "_id": {
     "$oid": "692996d4148b33bb0873abc2"
   },
-  "user_id": 101,
-  "full_name": "long",
+  "user_id": "U101",
+  "full_name": "HoangLong",
   "email": "110122107@st.tvu.edu.vn",
-  "password": "$2a$10$EZd6XLWm0CDGSLEc8WRl1O2Z9mtlQpe7rvw7HCdEMgcsLe1RpdTPK",
+  "password": "$2a$10$/vMibWIiMjxp8NMoEj9Yw.BqZH/7j/v34dN/PwUt230JuJJtY7sN2",
   "phone_number": "0383277120",
   "role": "customer",
   "created_at": {
     "$date": "2025-11-28T12:34:28.917Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "693283ab71bbc66b90a8d2b2"
+  },
+  "user_id": 102,
+  "full_name": "AN",
+  "email": "an@gmail.com",
+  "password": "$2a$10$Ok1A9xVXHBge6lXdmgUUgOiI3Nv9X/Mv5a41zKLxJ4BuddD5hE1QC",
+  "phone_number": "03832654789",
+  "role": "customer",
+  "created_at": {
+    "$date": "2025-12-05T07:03:07.506Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "693612f72e735af8a9061c6c"
+  },
+  "user_id": "U102",
+  "full_name": "Phan Dang Khoa",
+  "email": "khoaphan@gmail.com",
+  "password": "$2a$10$.gRviuUQzdK7og22tx6kHeADd6uPPQZh5zjxJgNnq1g0mrKKHesRq",
+  "phone_number": "038947948",
+  "role": "customer",
+  "created_at": {
+    "$date": "2025-12-07T23:51:19.501Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "693a593dc21926afa3a9d30d"
+  },
+  "user_id": "U103",
+  "full_name": "Phạm Minh Nhật",
+  "email": "nhatpham@gmail.com",
+  "password": "$2a$10$Q/jrKRrpCmdNMhiSDbYd0eDsX6XsQhmLwMod5MG8tJTzN3GBg2ddO",
+  "phone_number": "0369874515",
+  "role": "customer",
+  "created_at": {
+    "$date": "2025-12-11T05:40:13.012Z"
   },
   "__v": 0
 }]

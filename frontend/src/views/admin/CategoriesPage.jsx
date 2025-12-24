@@ -101,7 +101,7 @@ const CategoriesPage = () => {
       <div className="page-header">
         <h2>Quản lý danh mục</h2>
         <button className="btn-primary" onClick={() => handleOpenModal()}>
-          ➕ Thêm danh mục
+          Thêm danh mục
         </button>
       </div>
 
