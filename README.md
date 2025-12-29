@@ -173,5 +173,7 @@ Frontend sẽ chạy tại `http://localhost:3001` (hoặc port khác nếu 3001
 
 ## Tác giả
 
-Dự án mẫu để học và thực hành kiến trúc MVC.
+Hồ Hoàng Long 
+Liên hệ: 0383277120
+Email: longho.28112003@gmail.com
 
