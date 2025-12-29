@@ -1,0 +1,8 @@
+[1] https://www.mongodb.com/resources/products/mongodb-version-history. 
+[2] https://www.mongodb.com/docs/manual/data-modeling/.
+[3] https://topdev.vn/blog/express-js-la-gi/.
+[4] https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/. 
+[5] https://khoahocsinhvien.com/aptech-lap-trinh-web-full-stack-voi-react-nodejs-mongodb-expressjs/. 
+[6] https://vi.reactjs.org/docs/faq-internals.html.
+[7] https://blog.postman.com/how-to-create-a-rest-api-with-node-js-and-express/. 
+[8] https://trungquandev.com/nodejs-xac-thuc-nguoi-dung-su-dung-jwt-token-refreshtoken/.
